@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, convert::TryInto};
 
 const BASE_ARG_INDEX:   usize = 1;
 const NUM_ARG_INDEX:    usize = 2;
@@ -14,16 +14,30 @@ impl Radix {
 		Self{x, radix}
 	}
 
-	fn as_str() -> str {
+	fn as_string(&self) -> String {
 		// Print the number `x` with the base of `radix`
-		let str_num = String::new();
+		let mut str_num = String::new();
+
+        let mut tmp = self.x;
+        let mut count: u32 = 0;
+
+        while tmp > 0 {
+            let radix_mask: i128 = self.radix.pow(count).try_into().unwrap();
+            let digit: i128 = (tmp / radix_mask) % radix_mask;
+            str_num = digit.to_string() + str_num.as_str();
+            count += 1;
+
+            tmp -= digit * radix_mask;
+        }
+
+        str_num   
 	}
 }
 
 
-impl std::fmt::Display for Radix {
-	write!("{:?}", self.as_str());
-}
+//impl std::fmt::Display for Radix {
+    //write!("{:?}", self.as_str());
+//}
 
 fn main() {
     // Get args 
@@ -34,6 +48,7 @@ fn main() {
     }
     let base = &args[BASE_ARG_INDEX];
     let num  = &args[NUM_ARG_INDEX];
+
     let mut target_base;
 
     if args.len() == 4 {
@@ -68,7 +83,7 @@ fn main() {
 
     // Print conversions
     println!("TODO: print all conversions");
-	
+    	
 }
 
 fn print_help() {
