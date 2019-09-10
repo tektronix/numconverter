@@ -4,7 +4,26 @@ const BASE_ARG_INDEX:   usize = 1;
 const NUM_ARG_INDEX:    usize = 2;
 const TARGET_ARG_INDEX: usize = 3;
 
+struct Radix {
+	x: i128,
+	radix: u32
+}
 
+impl Radix {
+	fn new(x: i128, radix: u32) -> Self {
+		Self{x, radix}
+	}
+
+	fn as_str() -> str {
+		// Print the number `x` with the base of `radix`
+		let str_num = String::new();
+	}
+}
+
+
+impl std::fmt::Display for Radix {
+	write!("{:?}", self.as_str());
+}
 
 fn main() {
     // Get args 
@@ -49,6 +68,7 @@ fn main() {
 
     // Print conversions
     println!("TODO: print all conversions");
+	
 }
 
 fn print_help() {
