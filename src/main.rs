@@ -1,64 +1,43 @@
-use std::{env, convert::TryInto};
-
-const BASE_ARG_INDEX:   usize = 1;
-const NUM_ARG_INDEX:    usize = 2;
-const TARGET_ARG_INDEX: usize = 3;
-
-
-//impl std::fmt::Display for Radix {
-    //write!("{:?}", self.as_str());
-//}
+use std::{convert::TryInto, string::ToString};
+use structopt::StructOpt;
 
 fn main() {
     // Get args
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 3 {
-        print_help();
-        return;
+    let opt = Opt::from_args();
+    println!("{:?}", opt);
+
+    let bases: Vec<String> = if opt.bases.is_empty() {
+        vec![
+            "2" .to_string(),
+            "8" .to_string(),
+            "10".to_string(),
+            "16".to_string()
+        ]
     }
-    let base = &args[BASE_ARG_INDEX];
-    let num  = &args[NUM_ARG_INDEX];
-
-    let mut target_base: Option<&str> = None;
-
-    if args.len() == 4 {
-        // Target base to be copied to clipboard
-        target_base = Some(args[TARGET_ARG_INDEX].as_str());
-    }
-
-
-    // Parse base
-    let base: u32 = match base.as_str() {
-        "b" | "bin" | "binary"      => 2,
-        "o" | "oct" | "octal"       => 8,
-        "d" | "dec" | "decimal"     => 10,
-        "h" | "hex" | "hexadecimal" => 16,
-        _ => {
-            println!("Error matching base {:?}", base);
-            print_help();
-            return;
-        },
+    else {
+        opt.bases
     };
 
-
     // Convert
-    let num = match i128::from_str_radix(&num, base) {
+    let num = match i128::from_str_radix(&opt.num, opt.in_base) {
         Ok(v)  => v,
         Err(_e) => {
-            println!("Could not convert {} from base {}", num, base);
-            print_help();
+            println!("Could not convert {} from base {}", opt.num, opt.in_base);
             return;
         },
     };
 
     // Print conversions
-    println!("Bin: {}", as_string_base(&num,  2).unwrap().as_str());
-    println!("Oct: {}", as_string_base(&num,  8).unwrap().as_str());
-    println!("Dec: {}", as_string_base(&num, 10).unwrap().as_str());
-    println!("Hex: {}", as_string_base(&num, 16).unwrap().as_str());
-    if target_base.is_some() {
-        let custom_base = u32::from_str_radix(&target_base.unwrap(), 10).unwrap();
-        println!("Base {:?}: {}", &custom_base, as_string_base(&num, custom_base).unwrap().as_str());
+    for target_base in bases {
+        let custom_base = u32::from_str_radix(&target_base, 10).unwrap();
+        match as_string_base(&num, custom_base) {
+            Ok(v)  => {
+                println!("Base {:02}: {}", &custom_base, v);
+            }
+            Err(e) => {
+                println!("Error with custom base: {}", e);
+            }
+        }
     }
 }
 
@@ -67,7 +46,6 @@ fn as_string_base(num: &i128, base: u32) -> Result<String, &str> {
         Err("Invalid Base.  Base must be between 1 and 32")
     }
     else {
-        // Print the number `x` with the base of `radix`
         let mut str_num = String::new();
 
         let mut tmp: i128 = *num;
@@ -126,6 +104,36 @@ fn as_string_base(num: &i128, base: u32) -> Result<String, &str> {
     }
 }
 
-fn print_help() {
-    println!("TODO: make the help menu");
+
+#[derive(StructOpt, Debug)]
+#[structopt(name = "numconverter", about = "A CLI number conversion utility written in Rust")]
+struct Opt {
+    /// Pad the output with leading 0s
+    #[structopt(short, long, default_value = "0")]
+    pad: u8,
+
+    /// Input Base
+    #[structopt(short, long, default_value = "10")]
+    in_base: u32,
+
+    /// Copy to system clipboard
+    #[structopt(short, long)]
+    copy: bool,
+
+    /// Number to convert
+    num: String,
+
+    /// Bases to convert to
+    bases: Vec<String>,
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bin() {
+
+    }
 }
