@@ -4,7 +4,10 @@ use structopt::StructOpt;
 fn main() {
     // Get args
     let opt = Opt::from_args();
-    println!("{:?}", opt);
+	
+    if opt.verbose > 0 {
+        println!("{:?}", opt);
+    }
 
     let bases: Vec<String> = if opt.bases.is_empty() {
         vec![
@@ -32,7 +35,10 @@ fn main() {
         let custom_base = u32::from_str_radix(&target_base, 10).unwrap();
         match as_string_base(&num, custom_base) {
             Ok(v)  => {
-                println!("Base {:02}: {}", &custom_base, v);
+                if opt.pretty {
+                    print!("Base {:02}: ");
+                }
+                println!("{}", &custom_base, v);
             }
             Err(e) => {
                 println!("Error with custom base: {}", e);
@@ -119,6 +125,14 @@ struct Opt {
     /// Copy to system clipboard
     #[structopt(short, long)]
     copy: bool,
+
+    /// Pretty Print
+    #[structopt(short, long)]
+    pretty: bool,
+
+    /// Verbosity (more v's, more verbose)
+    #[structopt(short, long, parse(from_occurrences))]
+    verbosity: u8,
 
     /// Number to convert
     num: String,
