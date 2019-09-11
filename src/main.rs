@@ -4,8 +4,8 @@ use structopt::StructOpt;
 fn main() {
     // Get args
     let opt = Opt::from_args();
-	
-    if opt.verbose > 0 {
+
+    if opt.verbosity > 0 {
         println!("{:?}", opt);
     }
 
@@ -35,10 +35,12 @@ fn main() {
         let custom_base = u32::from_str_radix(&target_base, 10).unwrap();
         match as_string_base(&num, custom_base) {
             Ok(v)  => {
-                if opt.pretty {
-                    print!("Base {:02}: ");
+                if !opt.silent {
+                    if opt.pretty {
+                        print!("Base {:02}: ", &custom_base);
+                    }
+                    println!("{}", v);
                 }
-                println!("{}", &custom_base, v);
             }
             Err(e) => {
                 println!("Error with custom base: {}", e);
@@ -48,8 +50,8 @@ fn main() {
 }
 
 fn as_string_base(num: &i128, base: u32) -> Result<String, &str> {
-    if base<1 || base>32 {
-        Err("Invalid Base.  Base must be between 1 and 32")
+    if base<2 || base>33 {
+        Err("Invalid Base.  Base must be between 1 and 33 (i.e. 2 to 32)")
     }
     else {
         let mut str_num = String::new();
@@ -61,46 +63,14 @@ fn as_string_base(num: &i128, base: u32) -> Result<String, &str> {
             let radix_mask: i128 = i128::from(base.pow(count));
             let digit: u8 = ((tmp / radix_mask) % i128::from(base)).try_into().unwrap();
 
-            // println!("count: {}, tmp: {}, radix_mask: {}, digit: {}", count, tmp, radix_mask, digit);
-
-            // TODO: Rust must have a better way of dealing with ASCII stuff, right?
-            let ch = match digit {
-                    0  => "0",
-                    1  => "1",
-                    2  => "2",
-                    3  => "3",
-                    4  => "4",
-                    5  => "5",
-                    6  => "6",
-                    7  => "7",
-                    8  => "8",
-                    9  => "9",
-                    10 => "A",
-                    11 => "B",
-                    12 => "C",
-                    13 => "D",
-                    14 => "E",
-                    15 => "F",
-                    16 => "G",
-                    17 => "H",
-                    18 => "I",
-                    19 => "J",
-                    20 => "K",
-                    21 => "L",
-                    22 => "M",
-                    23 => "N",
-                    24 => "O",
-                    25 => "P",
-                    26 => "Q",
-                    27 => "R",
-                    28 => "S",
-                    29 => "T",
-                    30 => "U",
-                    31 => "V",
-                    _  => "Z",
+            let ch = if digit >= 10 {
+                (b'A' + (digit-10)) as char
+            }
+            else {
+                (b'0' + digit) as char
             };
 
-            str_num = ch.to_owned() + str_num.as_str();
+            str_num = ch.to_string() + str_num.as_str();
 
             count += 1;
             tmp -= i128::from(digit) * radix_mask;
@@ -126,8 +96,12 @@ struct Opt {
     #[structopt(short, long)]
     copy: bool,
 
-    /// Pretty Print
+    /// Do not print output (for use with clipboard)
     #[structopt(short, long)]
+    silent: bool,
+
+    /// Pretty Print
+    #[structopt(long)]
     pretty: bool,
 
     /// Verbosity (more v's, more verbose)
