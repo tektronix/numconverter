@@ -49,9 +49,9 @@ fn main() {
     }
 }
 
-fn as_string_base(num: &i128, base: u32) -> Result<String, &str> {
+fn as_string_base(num: &i128, base: u32) -> Result<String, String> {
     if base<2 || base>33 {
-        Err("Invalid Base.  Base must be between 1 and 33 (i.e. 2 to 32)")
+        Err("Invalid Base.  Base must be between 1 and 33 (i.e. 2 to 32)".to_owned())
     }
     else {
         let mut str_num = String::new();
@@ -61,7 +61,12 @@ fn as_string_base(num: &i128, base: u32) -> Result<String, &str> {
 
         while tmp > 0 {
             let radix_mask: i128 = i128::from(base.pow(count));
-            let digit: u8 = ((tmp / radix_mask) % i128::from(base)).try_into().unwrap();
+            let digit: u8 = match ((tmp / radix_mask) % i128::from(base)).try_into() {
+                Ok(v)  => v,
+                Err(_) => { 
+                    return Err(format!("Error while trying to convert to radix {}", base));
+                },
+            };
 
             let ch = if digit >= 10 {
                 (b'A' + (digit-10)) as char
