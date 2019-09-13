@@ -21,18 +21,24 @@ fn main() {
         opt.bases
     };
 
-    // Convert
-    let num = match i128::from_str_radix(&opt.num, opt.in_base) {
+    // Convert input numer to base 10
+    let num = match i128::from_str_radix(&opt.num, opt.base) {
         Ok(v)  => v,
         Err(_e) => {
-            println!("Could not convert {} from base {}", opt.num, opt.in_base);
+            println!("Could not convert {} from base {}", opt.num, opt.base);
             return;
         },
     };
 
     // Print conversions
     for target_base in bases {
-        let custom_base = u32::from_str_radix(&target_base, 10).unwrap();
+        let custom_base = match u32::from_str_radix(&target_base, 10) {
+            Ok (v) => v,
+            Err(_) => {
+                println!("Error with target base {}\nPlease provide target base is base 10.", target_base);
+                return;
+            },
+        };
         match as_string_base(&num, custom_base) {
             Ok(v)  => {
                 if !opt.silent {
@@ -95,7 +101,7 @@ struct Opt {
 
     /// Input Base
     #[structopt(short, long, default_value = "10")]
-    in_base: u32,
+    base: u32,
 
     /// Copy to system clipboard
     #[structopt(short, long)]
@@ -127,6 +133,17 @@ mod tests {
 
     #[test]
     fn test_bin() {
+        assert_eq!(as_string_base(&4,   2).unwrap(), "100");
+        assert_eq!(as_string_base(&12,  2).unwrap(), "1100");
+        assert_eq!(as_string_base(&187, 2).unwrap(), "10111011");
+        assert_eq!(as_string_base(&69,  2).unwrap(), "1000101");
+    }
 
+    #[test]
+    fn test_hex(){
+        assert_eq!(as_string_base(&4,   16).unwrap(), "4");
+        assert_eq!(as_string_base(&12,  16).unwrap(), "C");
+        assert_eq!(as_string_base(&187, 16).unwrap(), "BB");
+        assert_eq!(as_string_base(&69,  16).unwrap(), "45");
     }
 }
