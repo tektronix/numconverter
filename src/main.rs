@@ -1,5 +1,8 @@
+extern crate clipboard;
+
 use std::{convert::TryInto, string::ToString};
 use structopt::StructOpt;
+use clipboard::{ClipboardProvider, ClipboardContext};
 
 fn main() {
     // Get args
@@ -39,17 +42,37 @@ fn main() {
                 return;
             },
         };
-        match as_string_base(&num, custom_base) {
-            Ok(v)  => {
-                if !opt.silent {
-                    if opt.pretty {
-                        print!("Base {:02}: ", &custom_base);
-                    }
-                    println!("{}", v);
-                }
-            }
+        let out_str = match as_string_base(&num, custom_base) {
+            Ok(v)  => v,
             Err(e) => {
-                println!("Error with custom base: {}", e);
+                println!("Error with custom base:\n\t{}", e);
+                return;
+            },
+        };
+
+        if !opt.silent {
+            if opt.pretty {
+                print!("Base {:02}: ", &custom_base);
+            }
+            println!("{}", out_str);
+        }
+
+        if opt.copy {
+            // let mut xcb: ClipboardContext;
+            let mut xcb: ClipboardContext = match ClipboardProvider::new() {
+                Ok (v) => v,
+                Err(e) => {
+                    println!("Error getting clipboard provider: {}", e);
+                    return;
+                },
+            };
+
+            match xcb.set_contents(out_str) {
+                Ok (_v) => (),
+                Err(e) => {
+                    println!("Error copying to clipboard:\n\t{}", e);
+                    return;
+                },
             }
         }
     }
