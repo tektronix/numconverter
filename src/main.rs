@@ -24,8 +24,8 @@ fn main() {
         opt.bases
     };
 
-    // Convert input numer to base 10
-    let num = match i128::from_str_radix(&opt.num, opt.base) {
+    // Convert input number to base 10
+    let num = match u128::from_str_radix(&opt.num, opt.base) {
         Ok(v)  => v,
         Err(_e) => {
             println!("Could not convert {} from base {}", opt.num, opt.base);
@@ -58,7 +58,6 @@ fn main() {
         }
 
         if opt.copy {
-            // let mut xcb: ClipboardContext;
             let mut xcb: ClipboardContext = match ClipboardProvider::new() {
                 Ok (v) => v,
                 Err(e) => {
@@ -71,28 +70,27 @@ fn main() {
                 Ok (_v) => (),
                 Err(e) => {
                     println!("Error copying to clipboard:\n\t{}", e);
-                    return;
                 },
             }
         }
     }
 }
 
-fn as_string_base(num: &i128, base: u32) -> Result<String, String> {
+fn as_string_base(num: &u128, base: u32) -> Result<String, String> {
     if base<2 || base>33 {
-        Err("Invalid Base.  Base must be between 1 and 33 (i.e. 2 to 32)".to_owned())
+        Err(String::from("Invalid Base.  Base must be between 1 and 33 (i.e. 2 to 32)"))
     }
     else {
         let mut str_num = String::new();
 
-        let mut tmp: i128 = *num;
+        let mut tmp: u128 = *num;
         let mut count: u32 = 0;
 
         while tmp > 0 {
-            let radix_mask: i128 = i128::from(base.pow(count));
-            let digit: u8 = match ((tmp / radix_mask) % i128::from(base)).try_into() {
+            let radix_mask: u128 = u128::from((base as u128).pow(count));
+            let digit: u8 = match ((tmp / radix_mask) % u128::from(base)).try_into() {
                 Ok(v)  => v,
-                Err(_) => { 
+                Err(_) => {
                     return Err(format!("Error while trying to convert to radix {}", base));
                 },
             };
@@ -107,7 +105,7 @@ fn as_string_base(num: &i128, base: u32) -> Result<String, String> {
             str_num = ch.to_string() + str_num.as_str();
 
             count += 1;
-            tmp -= i128::from(digit) * radix_mask;
+            tmp -= u128::from(digit) * radix_mask;
         }
 
         Ok(str_num)
