@@ -1,8 +1,8 @@
-extern crate clipboard;
+//extern crate clipboard;
 
 use std::{convert::TryInto, string::ToString};
 use structopt::StructOpt;
-use clipboard::{ClipboardProvider, ClipboardContext};
+//use clipboard::{ClipboardProvider, ClipboardContext};
 
 fn main() {
     // Get args
@@ -51,28 +51,28 @@ fn main() {
         };
 
         if !opt.silent {
-            if opt.pretty {
+            if !opt.bare {
                 print!("Base {:02}: ", &custom_base);
             }
             println!("{}", out_str);
         }
 
-        if opt.copy {
-            let mut xcb: ClipboardContext = match ClipboardProvider::new() {
-                Ok (v) => v,
-                Err(e) => {
-                    println!("Error getting clipboard provider: {}", e);
-                    return;
-                },
-            };
-
-            match xcb.set_contents(out_str) {
-                Ok (_v) => (),
-                Err(e) => {
-                    println!("Error copying to clipboard:\n\t{}", e);
-                },
-            }
-        }
+//        if opt.copy {
+//            let mut xcb: ClipboardContext = match ClipboardProvider::new() {
+//                Ok (v) => v,
+//                Err(e) => {
+//                    println!("Error getting clipboard provider: {}", e);
+//                    return;
+//                },
+//            };
+//
+//            match xcb.set_contents(out_str) {
+//                Ok (_v) => (),
+//                Err(e) => {
+//                    println!("Error copying to clipboard:\n\t{}", e);
+//                },
+//            }
+//        }
     }
 }
 
@@ -134,7 +134,7 @@ struct Opt {
 
     /// Pretty Print
     #[structopt(long)]
-    pretty: bool,
+    bare: bool,
 
     /// Verbosity (more v's, more verbose)
     #[structopt(short, long, parse(from_occurrences))]

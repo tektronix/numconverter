@@ -16,3 +16,5 @@ Clone the repo and run `cargo build --release`.  The executable will be in the `
 ## Use
 [placeholder].  TODO: Document use.
 
+## TODO
+- Add spacer option: insert a `_` every N characters (default 4)
