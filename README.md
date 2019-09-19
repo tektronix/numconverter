@@ -18,3 +18,4 @@ Clone the repo and run `cargo build --release`.  The executable will be in the `
 
 ## TODO
 - Add spacer option: insert a `_` every N characters (default 4)
+- Add return codes 
