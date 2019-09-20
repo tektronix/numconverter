@@ -3,10 +3,11 @@
 Simple base conversion project in Rust.
 
 ## Dependancies
-- xorg-dev
-- libxcb-render-util0-dev
-- libxcb-shape0-dev
-- libxcb-xfixes0-dev
+- For clipboard (currently disabled)
+  - xorg-dev
+  - libxcb-render-util0-dev
+  - libxcb-shape0-dev
+  - libxcb-xfixes0-dev
 
 `sudo apt install xorg-dev libxcb-render-util0-dev libxcb-shape-dev libxcb-xfixes0-dev`
 
