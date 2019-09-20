@@ -1,10 +1,26 @@
 //extern crate clipboard;
 
-use std::{convert::TryInto, string::ToString};
+use std::{convert::TryInto, string::ToString, fmt};
 use structopt::StructOpt;
 //use clipboard::{ClipboardProvider, ClipboardContext};
 
-fn main() {
+enum ErrorCode {
+    BaseConversionErr,
+    TargetBaseErr,
+    InputBaseErr,
+}
+
+impl fmt::Debug for ErrorCode {
+    fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match *self {
+            ErrorCode::BaseConversionErr => "Base Conversion Error",
+            ErrorCode::TargetBaseErr     => "Target Base Error",
+            ErrorCode::InputBaseErr      => "Input Base Error",
+        })
+    }
+}
+
+fn main() -> Result<(), ErrorCode> {
     // Get args
     let opt = Opt::from_args();
 
@@ -29,7 +45,7 @@ fn main() {
         Ok(v)  => v,
         Err(_e) => {
             println!("Could not convert {} from base {}", opt.num, opt.base);
-            return;
+            return Err(ErrorCode::BaseConversionErr);
         },
     };
 
@@ -39,29 +55,29 @@ fn main() {
             Ok (v) => v,
             Err(_) => {
                 println!("Error with target base {}\nPlease provide target base is base 10.", target_base);
-                return;
+                return Err(ErrorCode::TargetBaseErr);
             },
         };
         let mut out_str = match as_string_base(&num, custom_base) {
             Ok(v)  => v,
             Err(e) => {
                 println!("Error with custom base:\n\t{}", e);
-                return;
+                return Err(ErrorCode::InputBaseErr);
             },
         };
 
         if !opt.silent {
-            if !opt.no_pad && opt.spacer_length > 0 {
+            if !opt.no_sep && opt.sep_length > 0 {
                 // Pad string every opt.spacer_length characters
                 // Need size-1/spacer_len additional slots in the string
-                let mut insert_idx: i32 = out_str.len() as i32 - opt.spacer_length as i32;
+                let mut insert_idx: i32 = out_str.len() as i32 - opt.sep_length as i32;
                 while insert_idx > 0 {
                     let left  = String::from(&out_str[..(insert_idx as usize)]);
                     let right = String::from(&out_str[(insert_idx as usize)..]);
                     out_str = left;
-                    out_str.push(opt.spacer_char);
+                    out_str.push(opt.sep_char);
                     out_str.push_str(&right);
-                    insert_idx -= opt.spacer_length as i32;
+                    insert_idx -= opt.sep_length as i32;
                 }
             }
             if !opt.bare {
@@ -87,6 +103,7 @@ fn main() {
 //            }
 //        }
     }
+    return Ok(());
 }
 
 fn as_string_base(num: &u128, base: u32) -> Result<String, String> {
@@ -135,15 +152,15 @@ struct Opt {
 
     /// Put a spacer every N characters
     #[structopt(short, long, default_value = "4")]
-    spacer_length: u32,
+    sep_length: u32,
 
     /// Specify spacer char
     #[structopt(long, default_value = "_")]
-    spacer_char: char,
+    sep_char: char,
 
     /// Do not pad the output
     #[structopt(long)]
-    no_pad: bool,
+    no_sep: bool,
 
     /// Input Base
     #[structopt(short, long, default_value = "10")]
