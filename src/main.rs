@@ -42,7 +42,7 @@ fn main() {
                 return;
             },
         };
-        let out_str = match as_string_base(&num, custom_base) {
+        let mut out_str = match as_string_base(&num, custom_base) {
             Ok(v)  => v,
             Err(e) => {
                 println!("Error with custom base:\n\t{}", e);
@@ -51,6 +51,19 @@ fn main() {
         };
 
         if !opt.silent {
+            if !opt.no_pad && opt.spacer_length > 0 {
+                // Pad string every opt.spacer_length characters
+                // Need size-1/spacer_len additional slots in the string
+                let mut insert_idx: i32 = out_str.len() as i32 - opt.spacer_length as i32;
+                while insert_idx > 0 {
+                    let left  = String::from(&out_str[..(insert_idx as usize)]);
+                    let right = String::from(&out_str[(insert_idx as usize)..]);
+                    out_str = left;
+                    out_str.push(opt.spacer_char);
+                    out_str.push_str(&right);
+                    insert_idx -= opt.spacer_length as i32;
+                }
+            }
             if !opt.bare {
                 print!("Base {:02}: ", &custom_base);
             }
@@ -119,6 +132,18 @@ struct Opt {
     /// Pad the output with leading 0s
     #[structopt(short, long, default_value = "0")]
     pad: u8,
+
+    /// Put a spacer every N characters
+    #[structopt(short, long, default_value = "4")]
+    spacer_length: u32,
+
+    /// Specify spacer char
+    #[structopt(long, default_value = "_")]
+    spacer_char: char,
+
+    /// Do not pad the output
+    #[structopt(long)]
+    no_pad: bool,
 
     /// Input Base
     #[structopt(short, long, default_value = "10")]
