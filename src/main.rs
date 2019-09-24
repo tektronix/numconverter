@@ -1,8 +1,5 @@
-//extern crate clipboard;
-
-use std::{convert::TryInto, string::ToString, fmt};
+use std::{convert::TryInto, string::ToString};
 use structopt::StructOpt;
-//use clipboard::{ClipboardProvider, ClipboardContext};
 
 enum ErrorCode {
     BaseConversionErr,
@@ -85,28 +82,23 @@ fn main() -> Result<(), ErrorCode> {
             }
             println!("{}", out_str);
         }
-
-//        if opt.copy {
-//            let mut xcb: ClipboardContext = match ClipboardProvider::new() {
-//                Ok (v) => v,
-//                Err(e) => {
-//                    println!("Error getting clipboard provider: {}", e);
-//                    return;
-//                },
-//            };
-//
-//            match xcb.set_contents(out_str) {
-//                Ok (_v) => (),
-//                Err(e) => {
-//                    println!("Error copying to clipboard:\n\t{}", e);
-//                },
-//            }
-//        }
     }
     return Ok(());
 }
 
-fn as_string_base(num: &u128, base: u32) -> Result<String, String> {
+fn get_from_base(from_base: &str) -> Option<u32>
+{
+    match from_base {
+        "b" => Some(2),
+        "o" => Some(8),
+        "d" => Some(10),
+        "h" => Some(16),
+        _   => None,
+    }
+}
+
+fn as_string_base(num: &u128, base: u32) -> Result<String, String>
+{
     if base<2 || base>33 {
         Err(String::from("Invalid Base.  Base must be between 1 and 33 (i.e. 2 to 32)"))
     }
@@ -165,10 +157,6 @@ struct Opt {
     /// Input Base
     #[structopt(short, long, default_value = "10")]
     base: u32,
-
-    /// Copy to system clipboard
-    #[structopt(short, long)]
-    copy: bool,
 
     /// Do not print output (for use with clipboard)
     #[structopt(short, long)]
