@@ -39,7 +39,7 @@ fn main() -> Result<(), ErrorCode> {
                     to_bases.insert(0, a_base);
                 }
                 from_num = Some(opt.from_base_char);
-                // If base_char wasn't provided, use the `-b` flag value as the base.
+                // base_char wasn't provided, use the `-b` flag value as the base.
                 opt.from_base
             },
         };
