@@ -14,7 +14,7 @@ alias hcon="numconverter -b 16"
 ```
 
 ## Dependancies
-No dependanceies are required to build, other than Rust itself.
+No dependanceies are required to build, other than [Rust](https://www.rust-lang.org/tools/install) itself.
 
 Uses the `structopt` crate to handle command line input.
 
