@@ -28,28 +28,29 @@ fn main() -> Result<(), ErrorCode> {
     //
     // Sort out the optional indexed argument
     //
-    let mut to_bases = opt.to_bases.clone();
+    let mut to_bases: Vec<String>    = opt.to_bases.clone();
     let mut from_num: Option<String> = opt.from_num;
-    let from_base = match get_from_base(opt.from_base_char.as_str()) {
-        Some(v) => v,
-        None    => {
-            // No base_char, push everything back one
-            to_bases = if to_bases.is_empty() || from_num.is_none() {
-                vec![
-                    "2" .to_string(),
-                    "8" .to_string(),
-                    "10".to_string(),
-                    "16".to_string()
-                ]
-            }
-            else {
-                to_bases.insert(0, from_num.unwrap());
-                to_bases
-            };
-            from_num = Some(opt.from_base_char);
-            opt.from_base
-        },
-    };
+    let from_base: u32 =
+        match get_from_base(opt.from_base_char.as_str()) {
+            Some(v) => v,
+            None => {
+                // No base_char. Push from_num to the bases Vec, push base_char to from_num.
+                if from_num.is_some() {
+                    to_bases.insert(0, from_num.unwrap());
+                }
+                from_num = Some(opt.from_base_char);
+                opt.from_base
+            },
+        };
+
+    if to_bases.is_empty() {
+        to_bases = vec![
+            "2" .to_string(),
+            "8" .to_string(),
+            "10".to_string(),
+            "16".to_string()
+        ]
+    }
 
     //
     // Convert input number to base 10
