@@ -28,3 +28,4 @@ For now `numconverter --help` will show you the options.
 - [x] ~~Add return codes~~
 - [x] ~~Optional first argument for base~~
 	- ~~Given as a single char (b, o, d, (h, x))~~
+- [ ] Filter out separation character from input string
