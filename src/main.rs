@@ -35,10 +35,11 @@ fn main() -> Result<(), ErrorCode> {
             Some(v) => v,
             None => {
                 // No base_char. Push from_num to the bases Vec, push base_char to from_num.
-                if from_num.is_some() {
-                    to_bases.insert(0, from_num.unwrap());
+                if let Some(a_base) = from_num {
+                    to_bases.insert(0, a_base);
                 }
                 from_num = Some(opt.from_base_char);
+                // If base_char wasn't provided, use the `-b` flag value as the base.
                 opt.from_base
             },
         };
