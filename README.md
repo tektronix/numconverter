@@ -3,22 +3,26 @@
 Simple base conversion project in Rust.
 
 ## Dependancies
-- For clipboard (currently disabled)
-  - xorg-dev
-  - libxcb-render-util0-dev
-  - libxcb-shape0-dev
-  - libxcb-xfixes0-dev
-
-`sudo apt install xorg-dev libxcb-render-util0-dev libxcb-shape-dev libxcb-xfixes0-dev`
+Uses the `structopt` crate to handle command line input.
 
 ## Installation
 Clone the repo and run `cargo build --release`.  The executable will be in the `target` directory.  Run from there, or move to a location in your `PATH` (`~/bin/` for example).
 
+I alias the name to `ncon` and derivitaves, based on what base I'm inputing:
+```
+alias ncon="numconverter"
+alias bcon="numconverter -b 2"
+alias ocon="numconverter -b 8"
+alias hcon="numconverter -b 16"
+```
+
 ## Use
-[placeholder].  TODO: Document use.
+TODO: Document use.
+
+For now `numconverter --help` will show you the options.
 
 ## TODO
-- ~~Add spacer option: insert a `_` every N characters (default 4)~~
-- ~~Add return codes~~
-- Optional first argument for base
-	- Given as a single char (b, o, d, (h, x))
+- [x] ~~Add spacer option: insert a `_` every N characters (default 4)~~
+- [x] ~~Add return codes~~
+- [x] ~~Optional first argument for base~~
+	- ~~Given as a single char (b, o, d, (h, x))~~
