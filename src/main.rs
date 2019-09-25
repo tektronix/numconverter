@@ -111,7 +111,7 @@ fn get_from_base(from_base: &str) -> Option<u32>
         "b" => Some(2),
         "o" => Some(8),
         "d" => Some(10),
-        "h" => Some(16),
+        "h" | "x" => Some(16),
         _   => None,
     }
 }
