@@ -7,8 +7,8 @@ enum ErrorCode {
     InputBaseErr,
 }
 
-impl fmt::Debug for ErrorCode {
-    fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
+impl std::fmt::Debug for ErrorCode {
+    fn fmt(&self, f:&mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", match *self {
             ErrorCode::BaseConversionErr => "Base Conversion Error",
             ErrorCode::TargetBaseErr     => "Target Base Error",
@@ -25,29 +25,46 @@ fn main() -> Result<(), ErrorCode> {
         println!("{:?}", opt);
     }
 
-    let bases: Vec<String> = if opt.bases.is_empty() {
-        vec![
-            "2" .to_string(),
-            "8" .to_string(),
-            "10".to_string(),
-            "16".to_string()
-        ]
-    }
-    else {
-        opt.bases
+    //
+    // Sort out the optional indexed argument
+    //
+    let mut to_bases = opt.to_bases.clone();
+    let mut from_num: Option<String> = opt.from_num;
+    let from_base = match get_from_base(opt.from_base_char.as_str()) {
+        Some(v) => v,
+        None    => {
+            // No base_char, push everything back one
+            to_bases = if to_bases.is_empty() || from_num.is_none() {
+                vec![
+                    "2" .to_string(),
+                    "8" .to_string(),
+                    "10".to_string(),
+                    "16".to_string()
+                ]
+            }
+            else {
+                to_bases.insert(0, from_num.unwrap());
+                to_bases
+            };
+            from_num = Some(opt.from_base_char);
+            opt.from_base
+        },
     };
 
+    //
     // Convert input number to base 10
-    let num = match u128::from_str_radix(&opt.num, opt.base) {
+    //
+    let from_num = from_num.unwrap();
+    let num = match u128::from_str_radix(&from_num, from_base) {
         Ok(v)  => v,
         Err(_e) => {
-            println!("Could not convert {} from base {}", opt.num, opt.base);
+            println!("Could not convert {} from base {}", from_num, from_base);
             return Err(ErrorCode::BaseConversionErr);
         },
     };
 
     // Print conversions
-    for target_base in bases {
+    for target_base in to_bases {
         let custom_base = match u32::from_str_radix(&target_base, 10) {
             Ok (v) => v,
             Err(_) => {
@@ -143,7 +160,7 @@ struct Opt {
     pad: u8,
 
     /// Put a spacer every N characters
-    #[structopt(short, long, default_value = "4")]
+    #[structopt(short = "-l", long, default_value = "4")]
     sep_length: u32,
 
     /// Specify spacer char
@@ -156,7 +173,7 @@ struct Opt {
 
     /// Input Base
     #[structopt(short, long, default_value = "10")]
-    base: u32,
+    from_base: u32,
 
     /// Do not print output (for use with clipboard)
     #[structopt(short, long)]
@@ -170,11 +187,14 @@ struct Opt {
     #[structopt(short, long, parse(from_occurrences))]
     verbosity: u8,
 
+    /// Char representation of input base (b, o, d, or h)
+    from_base_char: String,
+
     /// Number to convert
-    num: String,
+    from_num: Option<String>,
 
     /// Bases to convert to
-    bases: Vec<String>,
+    to_bases: Vec<String>,
 }
 
 
