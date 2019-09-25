@@ -24,7 +24,7 @@ TODO: Document use.
 For now `numconverter --help` will show you the options.
 
 ## TODO
-- [x] ~~Add spacer option: insert a `_` every N characters (default 4)~~
+- [x] ~~Add spacer option: insert specified character (default `_`) every N characters (default 4)~~
 - [x] ~~Add return codes~~
 - [x] ~~Optional first argument for base~~
 	- ~~Given as a single char (b, o, d, (h, x))~~
