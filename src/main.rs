@@ -188,7 +188,7 @@ struct Opt {
     #[structopt(short, long, parse(from_occurrences))]
     verbosity: u8,
 
-    /// Char representation of input base (b, o, d, or h)
+    /// Char representation of input base (b, o, d, or h) [optional]
     from_base_char: String,
 
     /// Number to convert
