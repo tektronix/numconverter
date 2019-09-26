@@ -5,7 +5,7 @@ Simple base conversion project in Rust.
 This is a for-fun project designed to give me a taste of Rust, CI, and publishing/maintaining a repo.
 
 ## Installation
-Clone the repo and run `cargo build --release`.  The executable will be in the `target` directory.  Run from there, or move to a location in your `PATH` (`~/bin/` for example).
+Clone the repo and run `cargo build --release`.  The executable `numconverter` will be in the `target/release` directory.  Run from there, or move/symlink to a location in your `PATH` (`~/bin/` for example).
 
 I alias the name to `ncon` and derivatives, based on what base I'm inputing:
 ```
