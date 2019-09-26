@@ -1,8 +1,15 @@
 [package]
 name = "numconverter"
 version = "0.1.0"
-authors = ["Zach Nielsen <zachary.nielsen@tektronix.com>"]
+authors = ["Zach Nielsen <zach@zachn.me>"]
 edition = "2018"
+licence = "MIT/Apache-2.0"
+homepage      = "https://github.com/ZatchBo/numconverter"
+repository    = "https://github.com/ZatchBo/numconverter" 
+documentation = "https://github.com/ZatchBo/numconverter" 
+description = "A simple CLI number converter"
+keywords = ["numconverter", "converter", "conversion"]
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
