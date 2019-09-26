@@ -10,9 +10,9 @@ Clone the repo and run `cargo build --release`.  The executable will be in the `
 I alias the name to `ncon` and derivatives, based on what base I'm inputing:
 ```
 alias ncon="numconverter"
-alias bcon="numconverter -b 2"
-alias ocon="numconverter -b 8"
-alias hcon="numconverter -b 16"
+alias bcon="numconverter --from-base 2"
+alias ocon="numconverter --from-base 8"
+alias hcon="numconverter --from-base 16"
 ```
 
 ## Dependancies
@@ -25,11 +25,40 @@ TODO: Document use.
 
 For now `numconverter --help` will show you the options.
 
+```
+numconverter [base_char] <from_num> [to_base]... [FLAGS]... [OPTIONS]...
+
+ARGS:
+    base_char   (b, o, d, h - binary, octal, decimal, hex) Character
+                representing the 'from' base.  If both the base_char and
+                the -f/--from-base are provided, base_char will be used.
+    from_num    The input number to convert.  Default base 10.
+    to_base     A list of base 10 numbers to convert from_num to.  Base
+                must be between 2 and 32 inclusive.
+
+FLAGS:
+        --bare          Disable Pretty Print
+    -h, --help          Prints help information
+        --no-sep        Do not pad the output
+    -s, --silent        Do not print output, for use with the clipboard on.
+                        Clipboard functionality not supported currently.
+    -V, --version       Prints version information
+    -v, --verbosity     Verbosity (more v's, more verbose)
+
+
+OPTIONS:
+    -f, --from-base <from-base>      Input Base [default: 10]
+    -p, --pad <pad>                  Pad the output with leading 0s [default: 0]
+        --sep-char <sep-char>        Specify spacer char [default: _]
+    -l, --sep-length <sep-length>    Put a spacer every N characters [default: 4]
+```
+
+
 ## TODO
 - [x] ~~Add spacer option: insert specified character (default `_`) every N characters (default 4)~~
 - [x] ~~Add return codes~~
 - [x] ~~Optional first argument for base~~
-	- ~~Given as a single char (b, o, d, (h, x))~~
+    - ~~Given as a single char (b, o, d, (h, x))~~
 - [ ] Filter out separation character from input string
 - [ ] Set up CI
 - [ ] Publish to crates.io

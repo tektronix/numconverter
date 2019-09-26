@@ -127,7 +127,7 @@ fn get_from_base(from_base: &str) -> Option<u32>
 fn as_string_base(num: &u128, base: u32) -> Result<String, String>
 {
     if base<2 || base>33 {
-        Err(String::from("Invalid Base.  Base must be between 1 and 33 (i.e. 2 to 32)"))
+        Err(String::from("Invalid Base.  Base must be between 2 and 32 inclusive"))
     }
     else {
         let mut str_num = String::new();
@@ -182,6 +182,8 @@ struct Opt {
     no_sep: bool,
 
     /// Input Base
+    ///
+    /// base_char takes precedence over this setting
     #[structopt(short, long, default_value = "10")]
     from_base: u32,
 
@@ -189,7 +191,7 @@ struct Opt {
     #[structopt(short, long)]
     silent: bool,
 
-    /// Pretty Print
+    /// Disable Pretty Print
     #[structopt(long)]
     bare: bool,
 
