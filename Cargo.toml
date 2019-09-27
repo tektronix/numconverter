@@ -2,7 +2,7 @@
 name = "numconverter"
 version = "1.0.0"
 authors = ["Zach Nielsen <zach@zachn.me>"]
-edition = "2019"
+edition = "2018"
 license = "MIT OR Apache-2.0"
 homepage      = "https://github.com/tektronix/numconverter"
 repository    = "https://github.com/tektronix/numconverter" 
