@@ -5,6 +5,5 @@ before_script:
   - cargo generate-lockfile
 script:
   - cargo test
-  - cargo fmt
   - cargo build --release
   - cargo audit
