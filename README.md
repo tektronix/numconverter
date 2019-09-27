@@ -47,7 +47,7 @@ FLAGS:
 
 
 OPTIONS:
-    -f, --from-base <from-base>      Input Base [default: 10]
+    -f, --from-base <from-base>      Base of the input number [default: 10]
     -p, --pad <pad>                  Pad the output with leading 0s [default: 0]
         --sep-char <sep-char>        Specify spacer char [default: _]
     -l, --sep-length <sep-length>    Put a spacer every N characters [default: 4]
