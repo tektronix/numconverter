@@ -1,4 +1,7 @@
+[![TekMonogram](https://tektronix.github.io/media/tekmonogram.png)](https://github.com/tektronix)
+
 # Number Converter
+[![Tektronix](https://tektronix.github.io/media/TEK-opensource_badge.svg)](https://github.com/tektronix)  [![CodeFactor](https://www.codefactor.io/repository/github/tektronix/numconverter/badge)](https://www.codefactor.io/repository/github/tektronix/numconverter) 
 
 Simple base conversion project in Rust.
 
