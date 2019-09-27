@@ -54,16 +54,12 @@ OPTIONS:
 ```
 
 
-## TODO
-- [x] ~~Add spacer option: insert specified character (default `_`) every N characters (default 4)~~
-- [x] ~~Add return codes~~
-- [x] ~~Optional first argument for base~~
-    - ~~Given as a single char (b, o, d, (h, x))~~
-- [ ] Filter out separation character from input string
-- [ ] Set up CI
-- [ ] Publish to crates.io
+## Contributing
+Before submitting a PR, please make sure you have run
+* `cargo test` - Runs defined tests.  Be sure to add test coverage for your PR! 😁
+* Ensure there are no warnings when compiling.
 
-## License
+### License
 
 Licensed under either of
  * Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
@@ -80,3 +76,5 @@ additional terms or conditions.
 #### Contributor License Agreement
 Contributions to this project must be accompanied by a Contributor License Agreement. You (or your employer) retain the copyright to your contribution; this simply gives us permission to use and redistribute your contributions as part of the project.
 
+### Maintainers
+[Zach Nielsen](https://github.com/ZatchBo) - @ZatchBo
