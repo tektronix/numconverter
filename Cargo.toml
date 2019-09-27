@@ -1,12 +1,12 @@
 [package]
 name = "numconverter"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Zach Nielsen <zach@zachn.me>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
-homepage      = "https://github.com/ZatchBo/numconverter"
-repository    = "https://github.com/ZatchBo/numconverter" 
-documentation = "https://github.com/ZatchBo/numconverter" 
+homepage      = "https://github.com/tektronix/numconverter"
+repository    = "https://github.com/tektronix/numconverter" 
+documentation = "https://github.com/tektronix/numconverter" 
 description = "A simple CLI number converter"
 keywords = ["numconverter", "converter", "conversion"]
 categories = ["command-line-utilities"]
