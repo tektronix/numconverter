@@ -1,0 +1,10 @@
+language: rust
+cache: cargo # cache cargo-audit once installed
+before_script:
+  - cargo install --force cargo-audit
+  - cargo generate-lockfile
+script:
+  - cargo test
+  - cargo fmt
+  - cargo build --release
+  - cargo audit
