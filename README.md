@@ -3,9 +3,7 @@
 # Number Converter
 [![Tektronix](https://tektronix.github.io/media/TEK-opensource_badge.svg)](https://github.com/tektronix)  [![CodeFactor](https://www.codefactor.io/repository/github/tektronix/numconverter/badge)](https://www.codefactor.io/repository/github/tektronix/numconverter) 
 
-Simple base conversion project in Rust.
-
-This is a for-fun project designed to give me a taste of Rust, CI, and publishing/maintaining a repo.
+A simple base conversion project in Rust.
 
 ## Installation
 Clone the repo and run `cargo build --release`.  The executable `numconverter` will be in the `target/release` directory.  Run from there, or move/symlink to a location in your `PATH` (`~/bin/` for example).
