@@ -64,7 +64,7 @@ fn main() -> Result<(), ErrorCode> {
     //
     // Convert input number to base 10
     //
-    let from_num = from_num.unwrap();
+    let from_num = from_num.unwrap().as_str().replace(opt.sep_char, "");
     let num = match u128::from_str_radix(&from_num, from_base) {
         Ok(v)  => v,
         Err(_e) => {
