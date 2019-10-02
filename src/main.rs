@@ -31,6 +31,8 @@ fn main() -> Result<(), ErrorCode> {
     // Get args
     let opt = Opt::from_args();
 
+    let unused_var = 52;
+
     if opt.verbosity > 0 {
         println!("{:?}", opt);
     }
