@@ -7,7 +7,7 @@
 // modified, or distributed except according to those terms.
 #![cfg_attr(feature="fail-on-warnings", deny(warnings))]
 
-use std::{convert::TryInto, string::ToString, cmp::PartialEq};
+use std::{convert::TryInto, string::ToString};
 use structopt::StructOpt;
 
 #[derive(PartialEq)]
@@ -30,8 +30,6 @@ impl std::fmt::Debug for ErrorCode {
 fn main() -> Result<(), ErrorCode> {
     // Get args
     let opt = Opt::from_args();
-
-    let unused_var = 52;
 
     if opt.verbosity > 0 {
         println!("{:?}", opt);
