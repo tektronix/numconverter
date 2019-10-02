@@ -59,6 +59,16 @@ $ numconverter b 1010 16
 Base 16: A
 ```
 
+Specify output bases (non standard)
+```
+$ numconverter 1234567890 3 5 12 22 32
+Base 03: 1001_2001_0011_1220_2200 
+Base 05: 10_0120_2213_3030
+Base 12: 2_A555_5016
+Base 22: AJC_3E26
+Base 32: 14P_C0MI
+```
+
 </details>
 
 Enter `numconverter --help` for available options.
