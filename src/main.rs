@@ -54,7 +54,7 @@ fn main() -> Result<(), ErrorCode> {
     //
     // Convert input number to base 10
     //
-    let num = convert_to_base_10(from_num, from_base)?;
+    let num = convert_to_base_10(from_num, from_base, opt.sep_char)?;
 
     // Print conversions
     for target_base in to_bases {
@@ -121,9 +121,9 @@ fn get_bases(opt: &Opt, to_bases: &mut Vec<String>) -> (u32, Option<String>) {
     }
 }
 
-fn convert_to_base_10(from_num: Option<String>, from_base: u32) -> Result<u128, ErrorCode> {
+fn convert_to_base_10(from_num: Option<String>, from_base: u32, sep_char: char) -> Result<u128, ErrorCode> {
     let from_num = if let Some(num) = from_num {
-        num
+        num.replace(sep_char, "")
     } else {
         println!("no number to convert was provided");
         return Err(ErrorCode::InputBaseErr);
@@ -283,10 +283,10 @@ mod tests {
 
     #[test]
     fn test_convert_to_base_10e() {
-        assert_eq!(convert_to_base_10(Some("10111011".to_owned()), 2), Ok(187));
-        assert_eq!(convert_to_base_10(Some("273".to_owned()), 8), Ok(187));
-        assert_eq!(convert_to_base_10(Some("187".to_owned()), 10), Ok(187));
-        assert_eq!(convert_to_base_10(Some("BB".to_owned()), 16), Ok(187));
-        assert_eq!(convert_to_base_10(None, 10), Err(ErrorCode::InputBaseErr));
+        assert_eq!(convert_to_base_10(Some("10111011".to_owned()), 2, '_'), Ok(187));
+        assert_eq!(convert_to_base_10(Some("273".to_owned()), 8, '_'), Ok(187));
+        assert_eq!(convert_to_base_10(Some("187".to_owned()), 10, '_'), Ok(187));
+        assert_eq!(convert_to_base_10(Some("BB".to_owned()), 16, '_'), Ok(187));
+        assert_eq!(convert_to_base_10(None, 10, '_'), Err(ErrorCode::InputBaseErr));
     }
 }
