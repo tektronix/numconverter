@@ -282,7 +282,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_base_10e() {
+    fn test_convert_to_base_10() {
         assert_eq!(convert_to_base_10(Some("10111011".to_owned()), 2, '_'), Ok(187));
         assert_eq!(convert_to_base_10(Some("273".to_owned()), 8, '_'), Ok(187));
         assert_eq!(convert_to_base_10(Some("187".to_owned()), 10, '_'), Ok(187));
