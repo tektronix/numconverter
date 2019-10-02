@@ -5,5 +5,5 @@ before_script:
   - cargo generate-lockfile
 script:
   - cargo test
-  - cargo build --release
+  - cargo build --features=fail-on-warnings
   - cargo audit
