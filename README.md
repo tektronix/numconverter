@@ -59,6 +59,7 @@ OPTIONS:
 Before submitting a PR, please make sure you have run
 * `cargo test` - Runs defined tests.  Be sure to add test coverage for your PR when possible! 😁
 * Ensure there are no warnings when compiling.
+  * TravisCI will be run with `cargo build --release --features=fail-on-warnings`, so give that a check to avoid waiting on the long CI build.
 
 ### License
 
