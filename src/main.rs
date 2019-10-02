@@ -6,9 +6,10 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::{convert::TryInto, string::ToString};
+use std::{convert::TryInto, string::ToString, cmp::PartialEq};
 use structopt::StructOpt;
 
+#[derive(PartialEq)]
 enum ErrorCode {
     BaseConversionErr,
     TargetBaseErr,
@@ -37,20 +38,9 @@ fn main() -> Result<(), ErrorCode> {
     // Sort out the optional indexed argument
     //
     let mut to_bases: Vec<String>    = opt.to_bases.clone();
-    let mut from_num: Option<String> = opt.from_num;
-    let from_base: u32 =
-        match get_from_base(opt.from_base_char.as_str()) {
-            Some(v) => v,
-            None => {
-                // No base_char. Push from_num to the bases Vec, push base_char to from_num.
-                if let Some(a_base) = from_num {
-                    to_bases.insert(0, a_base);
-                }
-                from_num = Some(opt.from_base_char);
-                // base_char wasn't provided, use the `-b` flag value as the base.
-                opt.from_base
-            },
-        };
+    let bases = get_bases(&opt, &mut to_bases);
+    let from_base: u32 = bases.0;
+    let from_num = bases.1;
 
     if to_bases.is_empty() {
         to_bases = vec![
@@ -64,14 +54,7 @@ fn main() -> Result<(), ErrorCode> {
     //
     // Convert input number to base 10
     //
-    let from_num = from_num.unwrap();
-    let num = match u128::from_str_radix(&from_num, from_base) {
-        Ok(v)  => v,
-        Err(_e) => {
-            println!("Could not convert {} from base {}", from_num, from_base);
-            return Err(ErrorCode::BaseConversionErr);
-        },
-    };
+    let num = convert_to_base_10(from_num, from_base)?;
 
     // Print conversions
     for target_base in to_bases {
@@ -121,6 +104,37 @@ fn get_from_base(from_base: &str) -> Option<u32>
         "d" => Some(10),
         "h" | "x" => Some(16),
         _   => None,
+    }
+}
+
+fn get_bases(opt: &Opt, to_bases: &mut Vec<String>) -> (u32, Option<String>) {
+    match get_from_base(opt.from_base_char.as_str()) {
+        Some(v) => (v, opt.from_num.clone()),
+        None => {
+            // No base_char. Push from_num to the bases Vec, push base_char to from_num.
+            if let Some(a_base) = &opt.from_num {
+                to_bases.insert(0, a_base.clone());
+            }
+            // base_char wasn't provided, use the `-b` flag value as the base.
+            (opt.from_base, Some(opt.from_base_char.clone()))
+        },
+    }
+}
+
+fn convert_to_base_10(from_num: Option<String>, from_base: u32) -> Result<u128, ErrorCode> {
+    let from_num = if let Some(num) = from_num {
+        num
+    } else {
+        println!("no number to convert was provided");
+        return Err(ErrorCode::InputBaseErr);
+    };
+
+    match u128::from_str_radix(&from_num, from_base) {
+        Ok(v)  => Ok(v),
+        Err(_e) => {
+            println!("Could not convert {} from base {}", from_num, from_base);
+            return Err(ErrorCode::BaseConversionErr);
+        },
     }
 }
 
@@ -223,10 +237,56 @@ mod tests {
     }
 
     #[test]
-    fn test_hex(){
+    fn test_oct() {
+        assert_eq!(as_string_base(&4,   8).unwrap(), "4");
+        assert_eq!(as_string_base(&12,  8).unwrap(), "14");
+        assert_eq!(as_string_base(&187, 8).unwrap(), "273");
+        assert_eq!(as_string_base(&69,  8).unwrap(), "105");
+    }
+
+    #[test]
+    fn test_hex() {
         assert_eq!(as_string_base(&4,   16).unwrap(), "4");
         assert_eq!(as_string_base(&12,  16).unwrap(), "C");
         assert_eq!(as_string_base(&187, 16).unwrap(), "BB");
         assert_eq!(as_string_base(&69,  16).unwrap(), "45");
+    }
+
+    #[test]
+    fn test_get_bases() {
+        let mut opt = Opt{
+            pad: 0,
+            sep_length: 4,
+            sep_char: '_',
+            no_sep: false,
+            from_base: 10,
+            silent: false,
+            bare: false,
+            verbosity: 0,
+            from_base_char: "b".to_owned(),
+            from_num: Some("187".to_owned()),
+            to_bases: Vec::new(),
+        };
+
+        let mut to_bases: Vec<String> = opt.to_bases.clone();
+        let res = get_bases(&opt, &mut to_bases);
+        assert_eq!(res.0, 2);
+        assert_eq!(res.1, Some("187".to_owned()));
+        assert!(to_bases.is_empty());
+
+        opt.from_base_char = "80".to_owned();
+        let res = get_bases(&opt, &mut to_bases);
+        assert_eq!(res.0, 10);
+        assert_eq!(res.1, Some("80".to_owned()));
+        assert!(!to_bases.is_empty());
+    }
+
+    #[test]
+    fn test_convert_to_base_10e() {
+        assert_eq!(convert_to_base_10(Some("10111011".to_owned()), 2), Ok(187));
+        assert_eq!(convert_to_base_10(Some("273".to_owned()), 8), Ok(187));
+        assert_eq!(convert_to_base_10(Some("187".to_owned()), 10), Ok(187));
+        assert_eq!(convert_to_base_10(Some("BB".to_owned()), 16), Ok(187));
+        assert_eq!(convert_to_base_10(None, 10), Err(ErrorCode::InputBaseErr));
     }
 }
