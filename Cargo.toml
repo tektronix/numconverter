@@ -5,13 +5,16 @@ authors = ["Zach Nielsen <zach@zachn.me>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 homepage      = "https://github.com/tektronix/numconverter"
-repository    = "https://github.com/tektronix/numconverter" 
-documentation = "https://github.com/tektronix/numconverter" 
+repository    = "https://github.com/tektronix/numconverter"
+documentation = "https://github.com/tektronix/numconverter"
 description = "A simple CLI number converter"
 keywords = ["numconverter", "converter", "conversion"]
 categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+fail-on-warnings = []
 
 [dependencies]
 structopt = "0.3"
