@@ -1,14 +1,29 @@
-// Copyright (c) 2019 Zachary Nielsen
+////////////////////////////////////////////////////////////////////////////////
+//  Module:   main.rs
+//
+//  Copyright © 2019 Zachary Nielsen
 //
 // Licensed under the Apache License, Version 2.0
 // <LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0> or the MIT
 // license <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
+////////////////////////////////////////////////////////////////////////////////
 #![cfg_attr(feature="fail-on-warnings", deny(warnings))]
 
+////////////////////////////////////////////////////////////////////////////////
+//  Included Modules
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+//  Namespaces
+////////////////////////////////////////////////////////////////////////////////
 use std::{convert::TryInto, string::ToString};
 use structopt::StructOpt;
+
+////////////////////////////////////////////////////////////////////////////////
+//  CODE
+////////////////////////////////////////////////////////////////////////////////
 
 #[derive(PartialEq)]
 enum ErrorCode {
@@ -97,6 +112,17 @@ fn main() -> Result<(), ErrorCode> {
     return Ok(());
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+ // NAME:   get_from_base
+ //
+ // NOTES:  Matches one of the valid input base chars to its number
+ // ARGS:   from_base - a single character representing the input base
+ // RETURN:
+ //     The base of the input or None if there was no match.  None either
+ //     indicates an error in the base, or the base was omitted.  Either way,
+ //     the result is handled downstream.
+ //
 fn get_from_base(from_base: &str) -> Option<u32>
 {
     match from_base {
@@ -108,6 +134,21 @@ fn get_from_base(from_base: &str) -> Option<u32>
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+ // NAME:   get_bases
+ //
+ // NOTES:
+ //     Handles the shifting of arguments if there was no from_base_char
+ //     provided.
+ // ARGS:
+ //     opt - command line options
+ //     to_bases - the list of bases to convert to (possibly empty)
+ // RETURN:
+ //     A tuple - (from_base, from_num)
+ //         from_base - the base we are converting from
+ //         from_num  - the number to convert, given in base specified
+ //                     by from_base
+ //
 fn get_bases(opt: &Opt, to_bases: &mut Vec<String>) -> (u32, Option<String>) {
     match get_from_base(opt.from_base_char.as_str()) {
         Some(v) => (v, opt.from_num.clone()),
@@ -122,6 +163,17 @@ fn get_bases(opt: &Opt, to_bases: &mut Vec<String>) -> (u32, Option<String>) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+ // NAME:   convert_to_base_10
+ //
+ // NOTES:  What it says on the tin
+ // ARGS:
+ //     from_num - String representation of a number in base `from_base
+ //     from_base - Base the input number is given in
+ //     sep_char - `from_base` String may have zero or more `sep_char` in it.
+ //                 The function must strip out those chars before converting.
+ // RETURN: Base in base 10, or an error.
+ //
 fn convert_to_base_10(from_num: Option<String>, from_base: u32, sep_char: char) -> Result<u128, ErrorCode> {
     let from_num = if let Some(num) = from_num {
         num.replace(sep_char, "")
@@ -139,6 +191,15 @@ fn convert_to_base_10(from_num: Option<String>, from_base: u32, sep_char: char) 
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+ // NAME:   as_string_base
+ //
+ // NOTES:  Converts the number `num` to a string representation of base `base`
+ // ARGS:
+ //     num - input number
+ //     base - output base
+ // RETURN: The number as a string, or an error
+ //
 fn as_string_base(num: &u128, base: u32) -> Result<String, String>
 {
     if base<2 || base>33 {

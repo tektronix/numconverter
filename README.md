@@ -28,7 +28,7 @@ Some basic usage examples are provided below:
 
 Basic decimal conversion
 ```
-$ numconverter.exe 255
+$ numconverter 255
 Base 02: 1111_1111
 Base 08: 377
 Base 10: 255
@@ -37,7 +37,7 @@ Base 16: FF
 
 Specify binary input
 ```
-$ numconverter.exe b 1001
+$ numconverter b 1001
 Base 02: 1001
 Base 08: 11
 Base 10: 9
@@ -46,7 +46,7 @@ Base 16: 9
 
 Specify hexidecimal input
 ```
-$ numconverter.exe h ab12
+$ numconverter h ab12
 Base 02: 1010_1011_0001_0010
 Base 08: 12_5422
 Base 10: 4_3794
@@ -55,7 +55,7 @@ Base 16: AB12
 
 Specify output base - binary (base 2) to hexidecimal (base 16)
 ```
-$ numconverter.exe b 1010 16
+$ numconverter b 1010 16
 Base 16: A
 ```
 
