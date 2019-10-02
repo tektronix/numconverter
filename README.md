@@ -1,7 +1,7 @@
 [![TekMonogram](https://tektronix.github.io/media/tekmonogram.png)](https://github.com/tektronix)
 
 # Number Converter
-[![Tektronix](https://tektronix.github.io/media/TEK-opensource_badge.svg)](https://github.com/tektronix)  [![CodeFactor](https://www.codefactor.io/repository/github/tektronix/numconverter/badge)](https://www.codefactor.io/repository/github/tektronix/numconverter) 
+[![Tektronix](https://tektronix.github.io/media/TEK-opensource_badge.svg)](https://github.com/tektronix)  [![CodeFactor](https://www.codefactor.io/repository/github/tektronix/numconverter/badge)](https://www.codefactor.io/repository/github/tektronix/numconverter) [![Build Status](https://travis-ci.com/tektronix/numconverter.svg?branch=master)](https://travis-ci.com/tektronix/numconverter)
 
 A simple base conversion project in Rust.
 
@@ -57,7 +57,7 @@ OPTIONS:
 
 ## Contributing
 Before submitting a PR, please make sure you have run
-* `cargo test` - Runs defined tests.  Be sure to add test coverage for your PR! 😁
+* `cargo test` - Runs defined tests.  Be sure to add test coverage for your PR when possible! 😁
 * Ensure there are no warnings when compiling.
 
 ### License
