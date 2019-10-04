@@ -62,7 +62,7 @@ Base 16: A
 Specify output bases (non standard)
 ```
 $ numconverter 1234567890 3 5 12 22 32
-Base 03: 1001_2001_0011_1220_2200 
+Base 03: 1001_2001_0011_1220_2200
 Base 05: 10_0120_2213_3030
 Base 12: 2_A555_5016
 Base 22: AJC_3E26
@@ -103,10 +103,14 @@ OPTIONS:
 
 
 ## Contributing
-Before submitting a PR, please make sure you have run
-* `cargo test` - Runs defined tests.  Be sure to add test coverage for your PR when possible! 😁
-* Ensure there are no warnings when compiling.
+Before submitting a PR, please make sure you have:
+* Run `cargo test`.
+  * This runs all the defined tests.  Be sure to add test coverage for your PR when possible! 😁
+* Checked there are no warnings when compiling.
+  * `cargo clean && cargo build` ensures everything is compiled fresh and will give you maximum visibility on warnings.
   * TravisCI will be run with `cargo build --features=fail-on-warnings`, so give that a check to avoid waiting on the long CI build.
+* Run `cargo fmt` and commit the result.
+  * Some of the results when automatically formatting are not ideal (in my opinion), but a common format is better than inconsistent format (also in my opinion).  The default format is a safe decision to be consistent with the rest of the Rust community.  If there is a formatting decision you find untenable, open an Issue and start a discussion (please be civil, see the [Code of Conduct](CODE_OF_CONDUCT.md) 😉).
 
 ### License
 

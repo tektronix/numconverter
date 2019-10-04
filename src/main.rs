@@ -9,7 +9,7 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 ////////////////////////////////////////////////////////////////////////////////
-#![cfg_attr(feature="fail-on-warnings", deny(warnings))]
+#![cfg_attr(feature = "fail-on-warnings", deny(warnings))]
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Included Modules
@@ -33,12 +33,16 @@ enum ErrorCode {
 }
 
 impl std::fmt::Debug for ErrorCode {
-    fn fmt(&self, f:&mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", match *self {
-            ErrorCode::BaseConversionErr => "Base Conversion Error",
-            ErrorCode::TargetBaseErr     => "Target Base Error",
-            ErrorCode::InputBaseErr      => "Input Base Error",
-        })
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match *self {
+                ErrorCode::BaseConversionErr => "Base Conversion Error",
+                ErrorCode::TargetBaseErr => "Target Base Error",
+                ErrorCode::InputBaseErr => "Input Base Error",
+            }
+        )
     }
 }
 
@@ -53,17 +57,17 @@ fn main() -> Result<(), ErrorCode> {
     //
     // Sort out the optional indexed argument
     //
-    let mut to_bases: Vec<String>    = opt.to_bases.clone();
+    let mut to_bases: Vec<String> = opt.to_bases.clone();
     let bases = get_bases(&opt, &mut to_bases);
     let from_base: u32 = bases.0;
     let from_num = bases.1;
 
     if to_bases.is_empty() {
         to_bases = vec![
-            "2" .to_string(),
-            "8" .to_string(),
+            "2".to_string(),
+            "8".to_string(),
             "10".to_string(),
-            "16".to_string()
+            "16".to_string(),
         ]
     }
 
@@ -75,18 +79,21 @@ fn main() -> Result<(), ErrorCode> {
     // Print conversions
     for target_base in to_bases {
         let custom_base = match u32::from_str_radix(&target_base, 10) {
-            Ok (v) => v,
+            Ok(v) => v,
             Err(_) => {
-                println!("Error with target base {}\nPlease provide target base is base 10.", target_base);
+                println!(
+                    "Error with target base {}\nPlease provide target base is base 10.",
+                    target_base
+                );
                 return Err(ErrorCode::TargetBaseErr);
-            },
+            }
         };
         let mut out_str = match as_string_base(&num, custom_base) {
-            Ok(v)  => v,
+            Ok(v) => v,
             Err(e) => {
                 println!("Error with custom base:\n\t{}", e);
                 return Err(ErrorCode::InputBaseErr);
-            },
+            }
         };
 
         if !opt.silent {
@@ -95,7 +102,7 @@ fn main() -> Result<(), ErrorCode> {
                 // Need size-1/spacer_len additional slots in the string
                 let mut insert_idx: i32 = out_str.len() as i32 - opt.sep_length as i32;
                 while insert_idx > 0 {
-                    let left  = String::from(&out_str[..(insert_idx as usize)]);
+                    let left = String::from(&out_str[..(insert_idx as usize)]);
                     let right = String::from(&out_str[(insert_idx as usize)..]);
                     out_str = left;
                     out_str.push(opt.sep_char);
@@ -112,43 +119,41 @@ fn main() -> Result<(), ErrorCode> {
     return Ok(());
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
- // NAME:   get_from_base
- //
- // NOTES:  Matches one of the valid input base chars to its number
- // ARGS:   from_base - a single character representing the input base
- // RETURN:
- //     The base of the input or None if there was no match.  None either
- //     indicates an error in the base, or the base was omitted.  Either way,
- //     the result is handled downstream.
- //
-fn get_from_base(from_base: &str) -> Option<u32>
-{
+// NAME:   get_from_base
+//
+// NOTES:  Matches one of the valid input base chars to its number
+// ARGS:   from_base - a single character representing the input base
+// RETURN:
+//     The base of the input or None if there was no match.  None either
+//     indicates an error in the base, or the base was omitted.  Either way,
+//     the result is handled downstream.
+//
+fn get_from_base(from_base: &str) -> Option<u32> {
     match from_base {
         "b" => Some(2),
         "o" => Some(8),
         "d" => Some(10),
         "h" | "x" => Some(16),
-        _   => None,
+        _ => None,
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
- // NAME:   get_bases
- //
- // NOTES:
- //     Handles the shifting of arguments if there was no from_base_char
- //     provided.
- // ARGS:
- //     opt - command line options
- //     to_bases - the list of bases to convert to (possibly empty)
- // RETURN:
- //     A tuple - (from_base, from_num)
- //         from_base - the base we are converting from
- //         from_num  - the number to convert, given in base specified
- //                     by from_base
- //
+// NAME:   get_bases
+//
+// NOTES:
+//     Handles the shifting of arguments if there was no from_base_char
+//     provided.
+// ARGS:
+//     opt - command line options
+//     to_bases - the list of bases to convert to (possibly empty)
+// RETURN:
+//     A tuple - (from_base, from_num)
+//         from_base - the base we are converting from
+//         from_num  - the number to convert, given in base specified
+//                     by from_base
+//
 fn get_bases(opt: &Opt, to_bases: &mut Vec<String>) -> (u32, Option<String>) {
     match get_from_base(opt.from_base_char.as_str()) {
         Some(v) => (v, opt.from_num.clone()),
@@ -159,22 +164,26 @@ fn get_bases(opt: &Opt, to_bases: &mut Vec<String>) -> (u32, Option<String>) {
             }
             // base_char wasn't provided, use the `-b` flag value as the base.
             (opt.from_base, Some(opt.from_base_char.clone()))
-        },
+        }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
- // NAME:   convert_to_base_10
- //
- // NOTES:  What it says on the tin
- // ARGS:
- //     from_num - String representation of a number in base `from_base
- //     from_base - Base the input number is given in
- //     sep_char - `from_base` String may have zero or more `sep_char` in it.
- //                 The function must strip out those chars before converting.
- // RETURN: Base in base 10, or an error.
- //
-fn convert_to_base_10(from_num: Option<String>, from_base: u32, sep_char: char) -> Result<u128, ErrorCode> {
+// NAME:   convert_to_base_10
+//
+// NOTES:  What it says on the tin
+// ARGS:
+//     from_num - String representation of a number in base `from_base
+//     from_base - Base the input number is given in
+//     sep_char - `from_base` String may have zero or more `sep_char` in it.
+//                 The function must strip out those chars before converting.
+// RETURN: Base in base 10, or an error.
+//
+fn convert_to_base_10(
+    from_num: Option<String>,
+    from_base: u32,
+    sep_char: char,
+) -> Result<u128, ErrorCode> {
     let from_num = if let Some(num) = from_num {
         num.replace(sep_char, "")
     } else {
@@ -183,29 +192,29 @@ fn convert_to_base_10(from_num: Option<String>, from_base: u32, sep_char: char) 
     };
 
     match u128::from_str_radix(&from_num, from_base) {
-        Ok(v)  => Ok(v),
+        Ok(v) => Ok(v),
         Err(_e) => {
             println!("Could not convert {} from base {}", from_num, from_base);
             return Err(ErrorCode::BaseConversionErr);
-        },
+        }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
- // NAME:   as_string_base
- //
- // NOTES:  Converts the number `num` to a string representation of base `base`
- // ARGS:
- //     num - input number
- //     base - output base
- // RETURN: The number as a string, or an error
- //
-fn as_string_base(num: &u128, base: u32) -> Result<String, String>
-{
-    if base<2 || base>33 {
-        Err(String::from("Invalid Base.  Base must be between 2 and 32 inclusive"))
-    }
-    else {
+// NAME:   as_string_base
+//
+// NOTES:  Converts the number `num` to a string representation of base `base`
+// ARGS:
+//     num - input number
+//     base - output base
+// RETURN: The number as a string, or an error
+//
+fn as_string_base(num: &u128, base: u32) -> Result<String, String> {
+    if base < 2 || base > 33 {
+        Err(String::from(
+            "Invalid Base.  Base must be between 2 and 32 inclusive",
+        ))
+    } else {
         let mut str_num = String::new();
 
         let mut tmp: u128 = *num;
@@ -214,16 +223,15 @@ fn as_string_base(num: &u128, base: u32) -> Result<String, String>
         while tmp > 0 {
             let radix_mask: u128 = u128::from((base as u128).pow(count));
             let digit: u8 = match ((tmp / radix_mask) % u128::from(base)).try_into() {
-                Ok(v)  => v,
+                Ok(v) => v,
                 Err(_) => {
                     return Err(format!("Error while trying to convert to radix {}", base));
-                },
+                }
             };
 
             let ch = if digit >= 10 {
-                (b'A' + (digit-10)) as char
-            }
-            else {
+                (b'A' + (digit - 10)) as char
+            } else {
                 (b'0' + digit) as char
             };
 
@@ -237,9 +245,11 @@ fn as_string_base(num: &u128, base: u32) -> Result<String, String>
     }
 }
 
-
 #[derive(StructOpt, Debug)]
-#[structopt(name = "numconverter", about = "A CLI number conversion utility written in Rust")]
+#[structopt(
+    name = "numconverter",
+    about = "A CLI number conversion utility written in Rust"
+)]
 struct Opt {
     /// Pad the output with leading 0s
     #[structopt(short, long, default_value = "0")]
@@ -285,7 +295,7 @@ struct Opt {
     to_bases: Vec<String>,
 }
 
-
+#[rustfmt::skip]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -316,7 +326,7 @@ mod tests {
 
     #[test]
     fn test_get_bases() {
-        let mut opt = Opt{
+        let mut opt = Opt {
             pad: 0,
             sep_length: 4,
             sep_char: '_',
@@ -345,10 +355,16 @@ mod tests {
 
     #[test]
     fn test_convert_to_base_10() {
-        assert_eq!(convert_to_base_10(Some("10111011".to_owned()), 2, '_'), Ok(187));
-        assert_eq!(convert_to_base_10(Some("273".to_owned()), 8, '_'), Ok(187));
+        assert_eq!(
+            convert_to_base_10(Some("10111011".to_owned()), 2, '_'),
+            Ok(187)
+        );
+        assert_eq!(convert_to_base_10(Some("273".to_owned()), 8,  '_'), Ok(187));
         assert_eq!(convert_to_base_10(Some("187".to_owned()), 10, '_'), Ok(187));
-        assert_eq!(convert_to_base_10(Some("BB".to_owned()), 16, '_'), Ok(187));
-        assert_eq!(convert_to_base_10(None, 10, '_'), Err(ErrorCode::InputBaseErr));
+        assert_eq!(convert_to_base_10(Some("BB" .to_owned()), 16, '_'), Ok(187));
+        assert_eq!(
+            convert_to_base_10(None, 10, '_'),
+            Err(ErrorCode::InputBaseErr)
+        );
     }
 }
