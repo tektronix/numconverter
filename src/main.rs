@@ -25,11 +25,15 @@ use structopt::StructOpt;
 //  CODE
 ////////////////////////////////////////////////////////////////////////////////
 
+#[cfg(target_os = "linux")]
+const CLIPBOARD_WAIT_TIMER: std::time::Duration = std::time::Duration::from_secs(1);
+
 #[derive(PartialEq)]
 enum ErrorCode {
     BaseConversionErr,
     TargetBaseErr,
     InputBaseErr,
+    ClipboardErr,
 }
 
 impl std::fmt::Debug for ErrorCode {
@@ -41,6 +45,7 @@ impl std::fmt::Debug for ErrorCode {
                 ErrorCode::BaseConversionErr => "Base Conversion Error",
                 ErrorCode::TargetBaseErr => "Target Base Error",
                 ErrorCode::InputBaseErr => "Input Base Error",
+                ErrorCode::ClipboardErr => "Clipboard access Error",
             }
         )
     }
@@ -76,6 +81,9 @@ fn main() -> Result<(), ErrorCode> {
     //
     let num = convert_to_base_10(from_num, from_base, opt.sep_char)?;
 
+    // Buffer to store content for the clipboard
+    let mut clipboard_buffer = String::default();
+
     // Print conversions
     for target_base in to_bases {
         let custom_base = match u32::from_str_radix(&target_base, 10) {
@@ -96,7 +104,7 @@ fn main() -> Result<(), ErrorCode> {
             }
         };
 
-        if !opt.silent {
+        if !opt.silent || opt.copy {
             if !opt.no_sep && opt.sep_length > 0 {
                 // Pad string every opt.spacer_length characters
                 // Need size-1/spacer_len additional slots in the string
@@ -110,13 +118,73 @@ fn main() -> Result<(), ErrorCode> {
                     insert_idx -= opt.sep_length as i32;
                 }
             }
-            if !opt.bare {
-                print!("Base {:02}: ", &custom_base);
+            if !opt.silent {
+                if !opt.bare {
+                    print!("Base {:02}: ", &custom_base);
+                }
+                println!("{}", out_str);
             }
-            println!("{}", out_str);
+            if opt.copy {
+                if !opt.bare {
+                    clipboard_buffer += &format!("Base {:02}: ", &custom_base);
+                }
+                clipboard_buffer += &format!("{}\n", out_str);
+            }
         }
     }
-    return Ok(());
+
+    if opt.copy {
+        handle_clipboard(clipboard_buffer)
+    } else {
+        Ok(())
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn handle_clipboard(content: String) -> Result<(), ErrorCode> {
+    use nix::unistd::{fork, ForkResult};
+    use x11_clipboard::Clipboard;
+
+    match fork() {
+        Err(_) => Err(ErrorCode::ClipboardErr),
+        Ok(ForkResult::Child) => {
+            let clipboard = Clipboard::new()
+                .map_err(|_e| ErrorCode::ClipboardErr)
+                .unwrap();
+            let conn = &clipboard.setter.connection;
+
+            clipboard
+                .store(
+                    clipboard.setter.atoms.clipboard,
+                    clipboard.setter.atoms.utf8_string,
+                    content,
+                )
+                .unwrap();
+
+            while let Ok(()) = conn.has_error() {
+                if x11_clipboard::xcb::get_selection_owner(&conn, clipboard.setter.atoms.clipboard)
+                    .get_reply()
+                    .map(|reply| reply.owner() != clipboard.setter.window)
+                    .unwrap_or(true)
+                {
+                    break;
+                }
+                std::thread::sleep(CLIPBOARD_WAIT_TIMER);
+            }
+            Ok(())
+        }
+        _ => Ok(()),
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn handle_clipboard(content: String) -> Result<(), ErrorCode> {
+    use clipboard::ClipboardProvider;
+
+    let mut clipboard = clipboard::ClipboardContext::new().map_err(|_e| ErrorCode::ClipboardErr)?;
+    clipboard
+        .set_contents(content)
+        .map_err(|_e| ErrorCode::ClipboardErr)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -277,6 +345,10 @@ struct Opt {
     #[structopt(short, long)]
     silent: bool,
 
+    /// Copy the resulting output to clipboard
+    #[structopt(short, long)]
+    copy: bool,
+
     /// Disable Pretty Print
     #[structopt(long)]
     bare: bool,
@@ -333,6 +405,7 @@ mod tests {
             no_sep: false,
             from_base: 10,
             silent: false,
+            copy: false,
             bare: false,
             verbosity: 0,
             from_base_char: "b".to_owned(),
