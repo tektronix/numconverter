@@ -104,32 +104,30 @@ fn main() -> Result<(), ErrorCode> {
             }
         };
 
-        if !opt.silent || opt.copy {
-            if !opt.no_sep && opt.sep_length > 0 {
-                // Pad string every opt.spacer_length characters
-                // Need size-1/spacer_len additional slots in the string
-                let mut insert_idx: i32 = out_str.len() as i32 - opt.sep_length as i32;
-                while insert_idx > 0 {
-                    let left = String::from(&out_str[..(insert_idx as usize)]);
-                    let right = String::from(&out_str[(insert_idx as usize)..]);
-                    out_str = left;
-                    out_str.push(opt.sep_char);
-                    out_str.push_str(&right);
-                    insert_idx -= opt.sep_length as i32;
-                }
+        if !opt.no_sep && opt.sep_length > 0 {
+            // Pad string every opt.spacer_length characters
+            // Need size-1/spacer_len additional slots in the string
+            let mut insert_idx: i32 = out_str.len() as i32 - opt.sep_length as i32;
+            while insert_idx > 0 {
+                let left = String::from(&out_str[..(insert_idx as usize)]);
+                let right = String::from(&out_str[(insert_idx as usize)..]);
+                out_str = left;
+                out_str.push(opt.sep_char);
+                out_str.push_str(&right);
+                insert_idx -= opt.sep_length as i32;
             }
-            if !opt.silent {
-                if !opt.bare {
-                    print!("Base {:02}: ", &custom_base);
-                }
-                println!("{}", out_str);
+        }
+        if !opt.silent {
+            if !opt.bare {
+                print!("Base {:02}: ", &custom_base);
             }
-            if opt.copy {
-                if !opt.bare {
-                    clipboard_buffer += &format!("Base {:02}: ", &custom_base);
-                }
-                clipboard_buffer += &format!("{}\n", out_str);
+            println!("{}", out_str);
+        }
+        if opt.copy {
+            if !opt.bare {
+                clipboard_buffer += &format!("Base {:02}: ", &custom_base);
             }
+            clipboard_buffer += &format!("{}\n", out_str);
         }
     }
 

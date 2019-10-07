@@ -19,7 +19,17 @@ alias hcon="numconverter --from-base 16"
 ## Dependancies
 Install Rust and you will have everything you need ([Rust installation instructions](https://www.rust-lang.org/tools/install)).
 
-Uses the `structopt` crate to handle command line input.
+
+#### Linux
+Dependencies for clipboard functionality include:
+- libxcb-shape0-dev
+- libxcb-xfixes0-dev
+
+Install with
+```
+sudo apt-get install libxcb-shape0-dev libxcb-xfixes0-dev
+```
+
 
 ## Usage
 

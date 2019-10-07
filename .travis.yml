@@ -1,8 +1,7 @@
 language: rust
 cache: cargo # cache cargo-audit once installed
 before_install:
-  - sudo apt-get install -y libxcb-shape0-dev
-  - sudo apt-get install -y libxcb-xfixes0-dev
+  - sudo apt-get install -y libxcb-shape0-dev libxcb-xfixes0-dev
 before_script:
   - cargo install --force cargo-audit
   - cargo generate-lockfile
