@@ -18,9 +18,8 @@ alias hcon="numconverter --from-base 16"
 
 ## Dependencies
 Built using Rust. ([Rust installation instructions](https://www.rust-lang.org/tools/install)).
-
-Uses the `structopt` crate to handle command line input.
-Uses the `clipboard` crate to handle read and write to clipboard. [For Linux: `x11_clipboard` & `nix` crates]
+- Uses the `structopt` crate to handle command line input.
+- Uses the `clipboard` crate to handle read and write to clipboard. [For Linux: `x11_clipboard` & `nix` crates]
 
 #### Linux
 Dependencies for clipboard functionality include:
