@@ -192,12 +192,13 @@ fn get_clipboard_content() -> Result<Option<String>, ErrorCode> {
     use x11_clipboard::Clipboard;
 
     let clipboard = Clipboard::new().map_err(|_| ErrorCode::ClipboardErr)?;
-    let val = clipboard.load(
-                clipboard.setter.atoms.clipboard,
-                clipboard.setter.atoms.utf8_string,
-                clipboard.setter.atoms.property,
-                std::time::Duration::from_secs(3)
-              )
+    let val = clipboard
+        .load(
+            clipboard.setter.atoms.clipboard,
+            clipboard.setter.atoms.utf8_string,
+            clipboard.setter.atoms.property,
+            std::time::Duration::from_secs(3),
+        )
         .map_err(|_| ErrorCode::ClipboardErr)?;
     let content = String::from_utf8(val).unwrap();
 
@@ -386,7 +387,7 @@ struct Opt {
     #[structopt(short, long)]
     copy: bool,
 
-    /// Get the input from clipboard
+    /// Get the input number from clipboard
     #[structopt(long)]
     from_clipboard: bool,
 
@@ -401,7 +402,7 @@ struct Opt {
     /// Char representation of input base (b, o, d, or h) [optional]
     from_base_char: Option<String>,
 
-    /// Number to convert
+    /// Number to convert [optional. Use --from-clipboard to get num from clipboard]
     from_num: Option<String>,
 
     /// Bases to convert to
@@ -450,19 +451,19 @@ mod tests {
             from_clipboard: false,
             bare: false,
             verbosity: 0,
-            from_base_char: "b".to_owned(),
+            from_base_char: Some("b".to_owned()),
             from_num: Some("187".to_owned()),
             to_bases: Vec::new(),
         };
 
         let mut to_bases: Vec<String> = opt.to_bases.clone();
-        let res = get_bases(&opt, &mut to_bases);
+        let res = get_bases(&opt, &mut to_bases).unwrap();
         assert_eq!(res.0, 2);
         assert_eq!(res.1, Some("187".to_owned()));
         assert!(to_bases.is_empty());
 
-        opt.from_base_char = "80".to_owned();
-        let res = get_bases(&opt, &mut to_bases);
+        opt.from_base_char = Some("80".to_owned());
+        let res = get_bases(&opt, &mut to_bases).unwrap();
         assert_eq!(res.0, 10);
         assert_eq!(res.1, Some("80".to_owned()));
         assert!(!to_bases.is_empty());
