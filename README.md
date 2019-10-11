@@ -16,10 +16,11 @@ alias ocon="numconverter --from-base 8"
 alias hcon="numconverter --from-base 16"
 ```
 
-## Dependancies
+## Dependencies
 Install Rust and you will have everything you need ([Rust installation instructions](https://www.rust-lang.org/tools/install)).
 
 Uses the `structopt` crate to handle command line input.
+Uses the `clipboard` crate to handle read and write to clipboard. [For Linux: `x11_clipboard` & `nix` crates]
 
 ## Usage
 
@@ -74,7 +75,7 @@ Base 32: 14P_C0MI
 Enter `numconverter --help` for available options.
 
 ```
-numconverter [base_char] <from_num> [to_base]... [FLAGS]... [OPTIONS]...
+numconverter [base_char] [from_num] [to_base]... [FLAGS]... [OPTIONS]...
 
 ARGS:
     base_char   (b, o, d, h - binary, octal, decimal, hex) Character
@@ -85,13 +86,14 @@ ARGS:
                 must be between 2 and 32 inclusive.
 
 FLAGS:
-        --bare          Disable Pretty Print
-    -h, --help          Prints help information
-        --no-sep        Do not pad the output
-    -s, --silent        Do not print output, for use with the clipboard on.
-                        Clipboard functionality not supported currently.
-    -V, --version       Prints version information
-    -v, --verbosity     Verbosity (more v's, more verbose)
+        --bare              Disable Pretty Print
+    -c, --copy              Copy the resulting ouput to clipboard
+        --from-clipboard    Get the input number from clipboard
+    -h, --help              Prints help information
+        --no-sep            Do not pad the output
+    -s, --silent            Do not print output, for use with the clipboard on.
+    -V, --version           Prints version information
+    -v, --verbosity         Verbosity (more v's, more verbose)
 
 
 OPTIONS:
