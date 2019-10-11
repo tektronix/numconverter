@@ -14,15 +14,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  Included Modules
 ////////////////////////////////////////////////////////////////////////////////
-extern crate clipboard;
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Namespaces
 ////////////////////////////////////////////////////////////////////////////////
 use std::{convert::TryInto, string::ToString};
 use structopt::StructOpt;
-use clipboard::ClipboardProvider;
-use clipboard::ClipboardContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 //  CODE
@@ -59,14 +56,7 @@ fn main() -> Result<(), ErrorCode> {
     let mut to_bases: Vec<String>    = opt.to_bases.clone();
     let bases = get_bases(&opt, &mut to_bases);
     let from_base: u32 = bases.0;
-    let from_num;
-
-    if opt.from_clipboard {
-        let mut ctx: ClipboardContext = ClipboardProvider::new().expect("Unable to access clipboard.");
-        from_num = ctx.get_contents().ok();
-    } else {
-        from_num = bases.1;
-    }
+    let from_num = bases.1;
 
     if to_bases.is_empty() {
         to_bases = vec![
@@ -277,10 +267,6 @@ struct Opt {
     #[structopt(short, long)]
     silent: bool,
 
-    /// Get input from clipboard
-    #[structopt(long)]
-    from_clipboard: bool,
-
     /// Disable Pretty Print
     #[structopt(long)]
     bare: bool,
@@ -337,7 +323,6 @@ mod tests {
             no_sep: false,
             from_base: 10,
             silent: false,
-            from_clipboard: false,
             bare: false,
             verbosity: 0,
             from_base_char: "b".to_owned(),
