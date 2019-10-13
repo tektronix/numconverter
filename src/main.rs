@@ -390,7 +390,7 @@ struct Opt {
     from_clipboard: bool,
 
     /// Disable Pretty Print
-    #[structopt(long)]
+    #[structopt(short, long)]
     bare: bool,
 
     /// Verbosity (more v's, more verbose)
