@@ -96,7 +96,7 @@ ARGS:
                 must be between 2 and 32 inclusive.
 
 FLAGS:
-        --bare              Disable Pretty Print
+    -b, --bare              Disable Pretty Print
     -c, --copy              Copy the resulting ouput to clipboard
         --from-clipboard    Get the input number from clipboard
     -h, --help              Prints help information
