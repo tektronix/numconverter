@@ -1,0 +1,15 @@
+name: CI
+
+on:
+  release:
+    types: [unpublished, prereleased]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Make a dry run publish for crates.io
+      run: cargo publish --dry-run
