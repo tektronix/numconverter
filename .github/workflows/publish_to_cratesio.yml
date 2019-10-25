@@ -1,0 +1,17 @@
+name: CI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Login and publish to crates.io
+      run: |
+        cargo login ${{ cratesio_token }}
+        cargo publish
