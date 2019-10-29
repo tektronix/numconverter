@@ -6,6 +6,14 @@
 A simple base conversion project in Rust.
 
 ## Installation
+
+### Crates.io
+Numconverter is on Crates.io! Just install via
+```
+cargo install numconverter
+```
+
+### From source
 Clone the repo and run `cargo build --release`.  The executable `numconverter` will be in the `target/release` directory.  Run from there, or move/symlink to a location in your `PATH` (`~/bin/` for example).
 
 I alias the name to `ncon` and derivatives, based on what base I'm inputing:
