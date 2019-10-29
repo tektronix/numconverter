@@ -208,7 +208,7 @@ fn get_clipboard_content() -> Result<Option<String>, ErrorCode> {
     use clipboard::ClipboardProvider;
 
     let mut clipboard = clipboard::ClipboardContext::new().map_err(|_| ErrorCode::ClipboardErr)?;
-    let content = clipboard.get_contents()?;
+    let content = clipboard.get_contents().map_err(|_| ErrorCode::ClipboardErr)?;
     Ok(Some(content.trim().to_string()))
 }
 
