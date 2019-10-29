@@ -1,7 +1,10 @@
+os:
+  - linux
+  - osx
 language: rust
 cache: cargo # cache cargo-audit once installed
 before_install:
-  - sudo apt-get install -y libxcb-shape0-dev libxcb-xfixes0-dev
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -y libxcb-shape0-dev libxcb-xfixes0-dev; fi
 before_script:
   - cargo install --force cargo-audit
   - cargo generate-lockfile
