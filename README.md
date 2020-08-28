@@ -2,8 +2,8 @@
 
 # Number Converter
 [![Tektronix](https://tektronix.github.io/media/TEK-opensource_badge.svg)](https://github.com/tektronix)
-[![CodeFactor](https://www.codefactor.io/repository/github/tektronix/numconverter/badge)](https://www.codefactor.io/repository/github/tektronix/numconverter) 
-[![Build Status](https://travis-ci.com/tektronix/numconverter.svg?branch=master)](https://travis-ci.com/tektronix/numconverter)
+[![CodeFactor](https://www.codefactor.io/repository/github/tektronix/numconverter/badge)](https://www.codefactor.io/repository/github/tektronix/numconverter)
+[![Build Status](https://travis-ci.com/tektronix/numconverter.svg?branch=main)](https://travis-ci.com/tektronix/numconverter)
 ![GitHub repo size](https://img.shields.io/github/repo-size/tektronix/numconverter)
 ![GitHub contributors](https://img.shields.io/github/contributors/tektronix/numconverter)
 ![GitHub stars](https://img.shields.io/github/stars/tektronix/numconverter?style=social)
