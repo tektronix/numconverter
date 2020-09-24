@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  Namespaces
 ////////////////////////////////////////////////////////////////////////////////
-use std::{convert::TryInto, string::ToString};
+use std::{convert::TryInto, string::ToString, collections::HashMap};
 use structopt::StructOpt;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,6 +63,7 @@ fn main() -> Result<(), ErrorCode> {
     // Sort out the optional indexed argument
     //
     let mut to_bases: Vec<String> = opt.to_bases.clone();
+    let mut sep_table: HashMap<String, u32> = [("10".to_string(), 3)].iter().cloned().collect();
     let bases = get_bases(&opt, &mut to_bases)?;
     let from_base: u32 = bases.0;
     let from_num = bases.1;
@@ -104,17 +105,28 @@ fn main() -> Result<(), ErrorCode> {
             }
         };
 
-        if !opt.no_sep && opt.sep_length > 0 {
+        // Get the separator length for this base
+        let sep_length = if sep_table.contains_key(&target_base) {
+            sep_table.get(&target_base).unwrap().clone()
+        }
+        else {
+            opt.sep_length
+        };
+
+        //
+        // Pad the print string with seperatar characters if needed
+        //
+        if !opt.no_sep && sep_length > 0 {
             // Pad string every opt.spacer_length characters
             // Need size-1/spacer_len additional slots in the string
-            let mut insert_idx: i32 = out_str.len() as i32 - opt.sep_length as i32;
+            let mut insert_idx: i32 = out_str.len() as i32 - sep_length as i32;
             while insert_idx > 0 {
                 let left = String::from(&out_str[..(insert_idx as usize)]);
                 let right = String::from(&out_str[(insert_idx as usize)..]);
                 out_str = left;
                 out_str.push(opt.sep_char);
                 out_str.push_str(&right);
-                insert_idx -= opt.sep_length as i32;
+                insert_idx -= sep_length as i32;
             }
         }
         if !opt.silent {
