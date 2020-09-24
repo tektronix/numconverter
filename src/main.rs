@@ -355,15 +355,15 @@ fn as_string_base(num: &u128, base: u32) -> Result<String, String> {
     about = "A CLI number conversion utility written in Rust"
 )]
 struct Opt {
-    /// Pad the output with leading 0s
+    /// Pad the output with a number of leading 0s [default: 0]
     #[structopt(short, long, default_value = "0")]
     pad: u8,
 
-    /// Put a spacer every N characters
+    /// Put a 'spacer' character every N characters [default: 4]
     #[structopt(short = "-l", long, default_value = "4")]
     sep_length: u32,
 
-    /// Specify spacer char
+    /// Specify the spacer char [default: '_']
     #[structopt(long, default_value = "_")]
     sep_char: char,
 
@@ -373,7 +373,7 @@ struct Opt {
 
     /// Input Base
     ///
-    /// base_char takes precedence over this setting
+    /// base_char takes precedence over input base
     #[structopt(short, long, default_value = "10")]
     from_base: u32,
 
@@ -385,7 +385,7 @@ struct Opt {
     #[structopt(short, long)]
     copy: bool,
 
-    /// Get the input number from clipboard
+    /// Get the input from the clipboard
     #[structopt(long)]
     from_clipboard: bool,
 
@@ -393,7 +393,7 @@ struct Opt {
     #[structopt(short, long)]
     bare: bool,
 
-    /// Verbosity (more v's, more verbose)
+    /// Verbosity (more v's = more verbose)
     #[structopt(short, long, parse(from_occurrences))]
     verbosity: u8,
 
