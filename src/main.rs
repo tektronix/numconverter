@@ -360,11 +360,11 @@ struct Opt {
     pad: u8,
 
     /// Put a spacer every N characters
-    #[structopt(short = "-l", long, default_value = "4")]
+    #[structopt(short = "-l", long, default_value = "0")]
     sep_length: u32,
 
     /// Specify spacer char
-    #[structopt(long, default_value = "_")]
+    #[structopt(long, default_value = ".")]
     sep_char: char,
 
     /// Do not pad the output
