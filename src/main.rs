@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  Namespaces
 ////////////////////////////////////////////////////////////////////////////////
-use std::{convert::TryInto, string::ToString, collections::HashMap};
+use std::{convert::TryInto, string::ToString, collections::HashMap, iter::FromIterator};
 use structopt::StructOpt;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,6 +33,7 @@ enum ErrorCode {
     BaseConversionErr,
     TargetBaseErr,
     InputBaseErr,
+    SeparatorMapParseError,
     ClipboardErr,
 }
 
@@ -46,6 +47,7 @@ impl std::fmt::Debug for ErrorCode {
                 ErrorCode::TargetBaseErr => "Target Base Error",
                 ErrorCode::InputBaseErr => "Input Base Error",
                 ErrorCode::ClipboardErr => "Clipboard access Error",
+                ErrorCode::SeparatorMapParseError => "Separator Map Parse Error"
             }
         )
     }
@@ -84,6 +86,22 @@ fn main() -> Result<(), ErrorCode> {
 
     // Buffer to store content for the clipboard
     let mut clipboard_buffer = String::default();
+
+    // Modify the sep_table if there are entries there
+    if opt.sep_map != "" {
+        let sep_map = opt.sep_map.split(':');
+        for pair in sep_map {
+            // let vec_pair = pair.split(',').map(|s| s.to_string()).collect();
+            let vec_pair = Vec::from_iter(pair.split(','));
+            let base = vec_pair[0];
+            let space = match u32::from_str_radix(vec_pair[1], 10) {
+                Ok(num) => num,
+                Err(_) => return sep_map_parse_err_print()
+            };
+
+            sep_table.insert(base.to_owned(), space);
+        }
+    }
 
     // Print conversions
     for target_base in to_bases {
@@ -148,6 +166,13 @@ fn main() -> Result<(), ErrorCode> {
     } else {
         Ok(())
     }
+}
+
+fn sep_map_parse_err_print() -> Result<(), ErrorCode> {
+    println!("Error parsing separator map.");
+    println!("Ensure separate entries are separated with ':'");
+    println!("Ensure base/space numbers are separated with ','");
+    return Err(ErrorCode::SeparatorMapParseError);
 }
 
 #[cfg(target_os = "linux")]
@@ -375,8 +400,17 @@ struct Opt {
     #[structopt(short = "-l", long, default_value = "4")]
     sep_length: u32,
 
+    /// Map of bases to spacer length
+    ///
+    /// Allows separation lengths to be assigned per base
+    /// Example - Base 10 outputs with length 3 spacer and base 4 with length 4 spacer:
+    /// --sep-map 10,3:4,4
+    /// All bases not specified use the --sep-length parameter.
+    #[structopt(long, default_value = "")]
+    sep_map: String,
+
     /// Specify spacer char
-    #[structopt(long, default_value = "_")]
+    #[structopt(long, default_value = "")]
     sep_char: char,
 
     /// Do not pad the output
@@ -453,6 +487,7 @@ mod tests {
         let mut opt = Opt {
             pad: 0,
             sep_length: 4,
+            sep_map: "".to_owned(),
             sep_char: '_',
             no_sep: false,
             from_base: 10,
