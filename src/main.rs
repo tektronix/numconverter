@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  Namespaces
 ////////////////////////////////////////////////////////////////////////////////
-use std::{convert::TryInto, string::ToString, collections::HashMap, iter::FromIterator};
+use std::{collections::HashMap, convert::TryInto, iter::FromIterator, string::ToString};
 use structopt::StructOpt;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ impl std::fmt::Debug for ErrorCode {
                 ErrorCode::TargetBaseErr => "Target Base Error",
                 ErrorCode::InputBaseErr => "Input Base Error",
                 ErrorCode::ClipboardErr => "Clipboard access Error",
-                ErrorCode::SeparatorMapParseError => "Separator Map Parse Error"
+                ErrorCode::SeparatorMapParseError => "Separator Map Parse Error",
             }
         )
     }
@@ -96,7 +96,7 @@ fn main() -> Result<(), ErrorCode> {
             let base = vec_pair[0];
             let space = match u32::from_str_radix(vec_pair[1], 10) {
                 Ok(num) => num,
-                Err(_) => return sep_map_parse_err_print()
+                Err(_) => return sep_map_parse_err_print(),
             };
 
             sep_table.insert(base.to_owned(), space);
@@ -126,8 +126,7 @@ fn main() -> Result<(), ErrorCode> {
         // Get the separator length for this base
         let sep_length = if sep_table.contains_key(&target_base) {
             sep_table.get(&target_base).unwrap().clone()
-        }
-        else {
+        } else {
             opt.sep_length
         };
 
@@ -245,7 +244,9 @@ fn get_clipboard_content() -> Result<Option<String>, ErrorCode> {
     use clipboard::ClipboardProvider;
 
     let mut clipboard = clipboard::ClipboardContext::new().map_err(|_| ErrorCode::ClipboardErr)?;
-    let content = clipboard.get_contents().map_err(|_| ErrorCode::ClipboardErr)?;
+    let content = clipboard
+        .get_contents()
+        .map_err(|_| ErrorCode::ClipboardErr)?;
     Ok(Some(content.trim().to_string()))
 }
 
@@ -487,15 +488,8 @@ mod tests {
         let mut opt = Opt {
             pad: 0,
             sep_length: 4,
-<<<<<<< HEAD
             sep_map: "".to_owned(),
             sep_char: '.',
-||||||| ff8185f
-            sep_char: '_',
-=======
-            sep_map: "".to_owned(),
-            sep_char: '_',
->>>>>>> 30a89e978fac59fc99a7ab71fa21822d0c771bdd
             no_sep: false,
             from_base: 10,
             silent: false,
