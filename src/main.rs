@@ -359,12 +359,12 @@ struct Opt {
     #[structopt(short, long, default_value = "0")]
     pad: u8,
 
-    /// Put a 'spacer' character every N characters [default: 4]
-    #[structopt(short = "-l", long, default_value = "4")]
+    /// Put a 'spacer' character every N characters [default: 0]
+    #[structopt(short = "-l", long, default_value = "0")]
     sep_length: u32,
 
-    /// Specify the spacer char [default: '_']
-    #[structopt(long, default_value = "_")]
+    /// Specify the spacer char [default: '.']
+    #[structopt(long, default_value = ".")]
     sep_char: char,
 
     /// Do not pad the output
