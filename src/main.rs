@@ -409,7 +409,7 @@ struct Opt {
     #[structopt(long, default_value = "")]
     sep_map: String,
 
-    /// Specify spacer char
+    /// Specify spacer char [default: '.']
     #[structopt(long, default_value = ".")]
     sep_char: char,
 
@@ -487,8 +487,15 @@ mod tests {
         let mut opt = Opt {
             pad: 0,
             sep_length: 4,
+<<<<<<< HEAD
             sep_map: "".to_owned(),
             sep_char: '.',
+||||||| ff8185f
+            sep_char: '_',
+=======
+            sep_map: "".to_owned(),
+            sep_char: '_',
+>>>>>>> 30a89e978fac59fc99a7ab71fa21822d0c771bdd
             no_sep: false,
             from_base: 10,
             silent: false,
