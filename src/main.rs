@@ -65,96 +65,133 @@ fn main() -> Result<(), ErrorCode> {
     // Sort out the optional indexed argument
     //
     let mut to_bases: Vec<String> = opt.to_bases.clone();
-    let mut sep_table: HashMap<String, u32> = [("10".to_string(), 3)].iter().cloned().collect();
+    let mut sep_table: HashMap<String, u32> = [
+            ( "2".to_string(), 4),
+            ("10".to_string(), 3),
+            ("16".to_string(), 4)
+        ].iter().cloned().collect();
+    let mut pad_table: HashMap<String, u32> = [
+            ( "2".to_string(), 8),
+            ("10".to_string(), 0),
+            ("16".to_string(), 2)
+        ].iter().cloned().collect();
     let bases = get_bases(&opt, &mut to_bases)?;
     let from_base: u32 = bases.0;
     let from_num = bases.1;
 
     if to_bases.is_empty() {
         to_bases = vec![
+            "A".to_string(),
             "2".to_string(),
-            "8".to_string(),
             "10".to_string(),
             "16".to_string(),
         ]
     }
 
-    //
     // Convert input number to base 10
-    //
-    let num = convert_to_base_10(from_num, from_base, opt.sep_char)?;
+    let num_vec: Vec<u128> =
+        if opt.is_string {
+            let sep_list = vec![',', '.', ' ', '-', '_', opt.sep_char];
+            from_num
+                .map(|num| num.split(&sep_list[..])
+                    .map(|s| s.to_string())
+                    .collect::<Vec<String>>())
+                .unwrap().iter()
+                .map(|num| convert_to_base_10(Some(num.to_string()), from_base, opt.sep_char).unwrap())
+                    .collect::<Vec<u128>>()
+        }
+        else {
+            vec![convert_to_base_10(from_num, from_base, opt.sep_char)?]
+        };
+
+    parse_map(&opt.sep_map, &mut sep_table)?;
+    parse_map(&opt.pad_map, &mut pad_table)?;
 
     // Buffer to store content for the clipboard
     let mut clipboard_buffer = String::default();
 
-    // Modify the sep_table if there are entries there
-    if opt.sep_map != "" {
-        let sep_map = opt.sep_map.split(':');
-        for pair in sep_map {
-            // let vec_pair = pair.split(',').map(|s| s.to_string()).collect();
-            let vec_pair = Vec::from_iter(pair.split(','));
-            let base = vec_pair[0];
-            let space = match u32::from_str_radix(vec_pair[1], 10) {
-                Ok(num) => num,
-                Err(_) => return sep_map_parse_err_print(),
-            };
-
-            sep_table.insert(base.to_owned(), space);
-        }
-    }
-
     // Print conversions
     for target_base in to_bases {
-        let custom_base = match u32::from_str_radix(&target_base, 10) {
-            Ok(v) => v,
-            Err(_) => {
-                println!(
-                    "Error with target base {}\nPlease provide target base is base 10.",
-                    target_base
-                );
-                return Err(ErrorCode::TargetBaseErr);
+        let (base_str, out_str) =
+            if target_base.to_ascii_uppercase() == "A" {
+                // Convert to ascii
+                let out_str: String =
+                    num_vec.iter().map(|c| *c as u8 as char).collect();
+                (String::from("ASCII"), out_str)
             }
-        };
-        let mut out_str = match as_string_base(&num, custom_base) {
-            Ok(v) => v,
-            Err(e) => {
-                println!("Error with custom base:\n\t{}", e);
-                return Err(ErrorCode::InputBaseErr);
-            }
-        };
+            else {
+                let custom_base = match u32::from_str_radix(&target_base, 10) {
+                    Ok(v) => v,
+                    Err(_) => {
+                        println!(
+                            "Error with target base {}\nPlease provide target base is base 10.",
+                            target_base
+                        );
+                        return Err(ErrorCode::TargetBaseErr);
+                    }
+                };
 
-        // Get the separator length for this base
-        let sep_length = if sep_table.contains_key(&target_base) {
-            sep_table.get(&target_base).unwrap().clone()
-        } else {
-            opt.sep_length
-        };
+                let mut out_str = String::from("");
+                for num in num_vec.iter() {
+                    let mut this_num_str = match as_string_base(&num, custom_base) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            println!("Error with custom base:\n\t{}", e);
+                            return Err(ErrorCode::InputBaseErr);
+                        }
+                    };
 
-        //
-        // Pad the print string with seperatar characters if needed
-        //
-        if !opt.no_sep && sep_length > 0 {
-            // Pad string every opt.spacer_length characters
-            // Need size-1/spacer_len additional slots in the string
-            let mut insert_idx: i32 = out_str.len() as i32 - sep_length as i32;
-            while insert_idx > 0 {
-                let left = String::from(&out_str[..(insert_idx as usize)]);
-                let right = String::from(&out_str[(insert_idx as usize)..]);
-                out_str = left;
-                out_str.push(opt.sep_char);
-                out_str.push_str(&right);
-                insert_idx -= sep_length as i32;
-            }
-        }
+                    // Get the separator length for this base
+                    let sep_length = if sep_table.contains_key(&target_base) {
+                        sep_table.get(&target_base).unwrap().clone()
+                    } else {
+                        opt.sep_length
+                    };
+
+                    //
+                    // Pad the print string with separator characters if needed
+                    //
+                    if opt.is_string {
+                        if pad_table.contains_key(&target_base) {
+                            let mut count = 0;
+                            while this_num_str.len() + count < pad_table[&target_base] as usize {
+                                out_str.push('0');
+                                count += 1;
+                            }
+                        }
+                        out_str.push_str(&this_num_str);
+                        out_str.push(opt.sep_char);
+                    }
+                    else if !opt.no_sep && sep_length > 0 {
+                        // Pad string every opt.spacer_length characters
+                        // Need size-1/spacer_len additional slots in the string
+                        let mut insert_idx: i32 = this_num_str.len() as i32 - sep_length as i32;
+                        while insert_idx > 0 {
+                            let left = String::from(&this_num_str[..(insert_idx as usize)]);
+                            let right = String::from(&this_num_str[(insert_idx as usize)..]);
+                            this_num_str = left;
+                            this_num_str.push(opt.sep_char);
+                            this_num_str.push_str(&right);
+                            insert_idx -= sep_length as i32;
+                        }
+                    }
+                }
+                if opt.is_string {
+                    out_str.pop();
+                }
+                (custom_base.to_string(), out_str)
+            };
+
+        // Print results
         if !opt.silent {
             if !opt.bare {
-                print!("Base {:02}: ", &custom_base);
+                print!("Base {:02}: ", &base_str);
             }
             println!("{}", out_str);
         }
         if opt.copy {
             if !opt.bare {
-                clipboard_buffer += &format!("Base {:02}: ", &custom_base);
+                clipboard_buffer += &format!("Base {:02}: ", &base_str);
             }
             clipboard_buffer += &format!("{}\n", out_str);
         }
@@ -167,12 +204,30 @@ fn main() -> Result<(), ErrorCode> {
     }
 }
 
-fn sep_map_parse_err_print() -> Result<(), ErrorCode> {
-    println!("Error parsing separator map.");
-    println!("Ensure separate entries are separated with ':'");
-    println!("Ensure base/space numbers are separated with ','");
+fn parse_map(map_to_parse: &str, table: &mut HashMap<String, u32>) -> Result<(), ErrorCode> {
+    if map_to_parse != "" {
+        let map = map_to_parse.split(',');
+        for pair in map {
+            let vec_pair = Vec::from_iter(pair.split(':'));
+            let base = vec_pair[0];
+            let space = match u32::from_str_radix(vec_pair[1], 10) {
+                Ok(num) => num,
+                Err(_) => return map_parse_err_print(),
+            };
+
+            table.insert(base.to_owned(), space);
+        }
+    }
+    Ok(())
+}
+
+fn map_parse_err_print() -> Result<(), ErrorCode> {
+    println!("Error parsing map.");
+    println!("Ensure separate entries are separated with ','");
+    println!("Ensure base/space numbers are separated with ':'");
     return Err(ErrorCode::SeparatorMapParseError);
 }
+
 
 #[cfg(target_os = "linux")]
 fn handle_clipboard(content: String) -> Result<(), ErrorCode> {
@@ -394,8 +449,8 @@ fn as_string_base(num: &u128, base: u32) -> Result<String, String> {
 )]
 struct Opt {
     /// Pad the output with a number of leading 0s [default: 0]
-    #[structopt(short, long, default_value = "0")]
-    pad: u8,
+    #[structopt(long, default_value = "")]
+    pad_map: String,
 
     /// Put a 'spacer' character every N characters [default: 0]
     #[structopt(short = "-l", long, default_value = "0")]
@@ -405,13 +460,13 @@ struct Opt {
     ///
     /// Allows separation lengths to be assigned per base
     /// Example - Base 10 outputs with length 3 spacer and base 4 with length 4 spacer:
-    /// --sep-map 10,3:4,4
+    /// --sep-map 10:3,4:4
     /// All bases not specified use the --sep-length parameter.
     #[structopt(long, default_value = "")]
     sep_map: String,
 
     /// Specify spacer char [default: '.']
-    #[structopt(long, default_value = ".")]
+    #[structopt(long, default_value = " ")]
     sep_char: char,
 
     /// Do not pad the output
@@ -439,6 +494,10 @@ struct Opt {
     /// Disable Pretty Print
     #[structopt(short, long)]
     bare: bool,
+
+    /// Convert string of characters
+    #[structopt(long = "str")]
+    is_string: bool,
 
     /// Verbosity (more v's = more verbose)
     #[structopt(short, long, parse(from_occurrences))]
