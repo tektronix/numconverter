@@ -152,15 +152,16 @@ fn main() -> Result<(), ErrorCode> {
                     // Pad the print string with separator characters if needed
                     //
                     if opt.is_string {
+                        let mut pre = String::new();
                         if pad_table.contains_key(&target_base) {
                             let mut count = 0;
                             while this_num_str.len() + count < pad_table[&target_base] as usize {
-                                out_str.push('0');
+                                pre.push('0');
                                 count += 1;
                             }
                         }
-                        out_str.push_str(&this_num_str);
-                        out_str.push(opt.sep_char);
+                        this_num_str = pre + &this_num_str;
+                        this_num_str.push(opt.sep_char);
                     }
                     else if !opt.no_sep && sep_length > 0 {
                         // Pad string every opt.spacer_length characters
@@ -175,6 +176,9 @@ fn main() -> Result<(), ErrorCode> {
                             insert_idx -= sep_length as i32;
                         }
                     }
+
+                    // Append to final out string
+                    out_str.push_str(&this_num_str);
                 }
                 if opt.is_string {
                     out_str.pop();
