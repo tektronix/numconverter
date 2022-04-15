@@ -75,30 +75,49 @@ fn main() -> Result<(), ErrorCode> {
             ("10".to_string(), 0),
             ("16".to_string(), 2)
         ].iter().cloned().collect();
-    let bases = get_bases(&opt, &mut to_bases)?;
-    let from_base: u32 = bases.0;
-    let from_num = bases.1;
+    let inputs = get_base_and_num(&opt, &mut to_bases)?;
+    let from_base: u32 = inputs.0;
+    let from_num = inputs.1;
 
     if to_bases.is_empty() {
-        to_bases = vec![
-            "A".to_string(),
+        if opt.is_string {
+            to_bases.push("A".to_string());
+        }
+
+        to_bases.append(&mut vec![
             "2".to_string(),
             "10".to_string(),
-            "16".to_string(),
-        ]
+            "16".to_string()
+        ])
     }
 
     // Convert input number to base 10
     let num_vec: Vec<u128> =
         if opt.is_string {
             let sep_list = vec![',', '.', ' ', '-', '_', opt.sep_char];
-            from_num
-                .map(|num| num.split(&sep_list[..])
+            let has_sep = from_num.contains(&sep_list[..]);
+
+            if !has_sep && from_base == 16 && (from_num.len() % 2) == 0 {
+                // No separators, manually split by groups of 2
+                let mut num_vec = Vec::new();
+                let mut holder = String::new();
+                for num in from_num.chars() {
+                    holder.push(num);
+                    if holder.len() == 2 {
+                        num_vec.push(convert_to_base_10(holder.to_string(), from_base, opt.sep_char)?);
+                        holder.clear();
+                    }
+                }
+                num_vec
+            }
+            else {
+                // Gather each separated number into a vector for separate conversion
+                from_num.split(&sep_list[..])
                     .map(|s| s.to_string())
-                    .collect::<Vec<String>>())
-                .unwrap().iter()
-                .map(|num| convert_to_base_10(Some(num.to_string()), from_base, opt.sep_char).unwrap())
-                    .collect::<Vec<u128>>()
+                    .collect::<Vec<String>>().iter()
+                    .map(|num| convert_to_base_10(num.to_string(), from_base, opt.sep_char).unwrap())
+                        .collect::<Vec<u128>>()
+            }
         }
         else {
             vec![convert_to_base_10(from_num, from_base, opt.sep_char)?]
@@ -299,14 +318,14 @@ fn get_clipboard_content() -> Result<Option<String>, ErrorCode> {
 }
 
 #[cfg(not(target_os = "linux"))]
-fn get_clipboard_content() -> Result<Option<String>, ErrorCode> {
+fn get_clipboard_content() -> Result<String, ErrorCode> {
     use clipboard::ClipboardProvider;
 
     let mut clipboard = clipboard::ClipboardContext::new().map_err(|_| ErrorCode::ClipboardErr)?;
     let content = clipboard
         .get_contents()
         .map_err(|_| ErrorCode::ClipboardErr)?;
-    Ok(Some(content.trim().to_string()))
+    Ok(content.trim().to_string())
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -330,7 +349,7 @@ fn get_from_base(from_base: &str) -> Option<u32> {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// NAME:   get_bases
+// NAME:   get_base_and_num
 //
 // NOTES:
 //     Handles the shifting of arguments if there was no from_base_char
@@ -344,18 +363,19 @@ fn get_from_base(from_base: &str) -> Option<u32> {
 //         from_num  - the number to convert, given in base specified
 //                     by from_base
 //
-fn get_bases(opt: &Opt, to_bases: &mut Vec<String>) -> Result<(u32, Option<String>), ErrorCode> {
+fn get_base_and_num(opt: &Opt, to_bases: &mut Vec<String>) -> Result<(u32, String), ErrorCode> {
     let from_base_char = opt.from_base_char.clone().unwrap_or("".to_string());
     match get_from_base(from_base_char.as_str()) {
-        Some(v) => Ok((v, opt.from_num.clone())),
+        Some(v) => Ok((v, opt.from_num.clone().expect("an input number"))),
         None => {
             // No base_char. Push from_num to the bases Vec, push base_char to from_num.
             if let Some(a_base) = &opt.from_num {
                 to_bases.insert(0, a_base.clone());
             }
+
             if !opt.from_clipboard {
                 // base_char wasn't provided, use the `-b` flag value as the base.
-                Ok((opt.from_base, Some(from_base_char)))
+                Ok((opt.from_base, from_base_char))
             } else {
                 if from_base_char != "" {
                     to_bases.insert(0, from_base_char.clone());
@@ -381,18 +401,13 @@ fn get_bases(opt: &Opt, to_bases: &mut Vec<String>) -> Result<(u32, Option<Strin
 // RETURN: Base in base 10, or an error.
 //
 fn convert_to_base_10(
-    from_num: Option<String>,
+    from_num: String,
     from_base: u32,
     sep_char: char,
 ) -> Result<u128, ErrorCode> {
-    let from_num = if let Some(num) = from_num {
-        num.replace(sep_char, "")
-    } else {
-        println!("no number to convert was provided");
-        return Err(ErrorCode::InputBaseErr);
-    };
+    let num = from_num.replace(sep_char, "");
 
-    match u128::from_str_radix(&from_num, from_base) {
+    match u128::from_str_radix(&num, from_base) {
         Ok(v) => Ok(v),
         Err(_e) => {
             println!("Could not convert {} from base {}", from_num, from_base);
@@ -452,11 +467,11 @@ fn as_string_base(num: &u128, base: u32) -> Result<String, String> {
     about = "A CLI number conversion utility written in Rust"
 )]
 struct Opt {
-    /// Pad the output with a number of leading 0s [default: 0]
+    /// Pad the output with a number of leading 0s
     #[structopt(long, default_value = "")]
     pad_map: String,
 
-    /// Put a 'spacer' character every N characters [default: 0]
+    /// Put a 'spacer' character every N characters
     #[structopt(short = "-l", long, default_value = "0")]
     sep_length: u32,
 
@@ -469,7 +484,7 @@ struct Opt {
     #[structopt(long, default_value = "")]
     sep_map: String,
 
-    /// Specify spacer char [default: '.']
+    /// Specify spacer char
     #[structopt(long, default_value = " ")]
     sep_char: char,
 
@@ -484,7 +499,7 @@ struct Opt {
     from_base: u32,
 
     /// Do not print output (for use with clipboard)
-    #[structopt(short, long)]
+    #[structopt(long)]
     silent: bool,
 
     /// Copy the resulting output to clipboard
@@ -500,7 +515,7 @@ struct Opt {
     bare: bool,
 
     /// Convert string of characters
-    #[structopt(long = "str")]
+    #[structopt(short = "s", long = "str")]
     is_string: bool,
 
     /// Verbosity (more v's = more verbose)
@@ -566,13 +581,13 @@ mod tests {
         };
 
         let mut to_bases: Vec<String> = opt.to_bases.clone();
-        let res = get_bases(&opt, &mut to_bases).unwrap();
+        let res = get_base_and_num(&opt, &mut to_bases).unwrap();
         assert_eq!(res.0, 2);
         assert_eq!(res.1, Some("187".to_owned()));
         assert!(to_bases.is_empty());
 
         opt.from_base_char = Some("80".to_owned());
-        let res = get_bases(&opt, &mut to_bases).unwrap();
+        let res = get_base_and_num(&opt, &mut to_bases).unwrap();
         assert_eq!(res.0, 10);
         assert_eq!(res.1, Some("80".to_owned()));
         assert!(!to_bases.is_empty());
