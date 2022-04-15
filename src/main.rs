@@ -80,15 +80,17 @@ fn main() -> Result<(), ErrorCode> {
     let from_num = inputs.1;
 
     if to_bases.is_empty() {
-        if opt.is_string {
+        if opt.is_string || opt.fourcc {
             to_bases.push("A".to_string());
         }
 
-        to_bases.append(&mut vec![
-            "2".to_string(),
-            "10".to_string(),
-            "16".to_string()
-        ])
+        if !opt.fourcc {
+            to_bases.append(&mut vec![
+                "2".to_string(),
+                "10".to_string(),
+                "16".to_string()
+            ])
+        }
     }
 
     // Convert input number to base 10
@@ -99,28 +101,25 @@ fn main() -> Result<(), ErrorCode> {
 
             if !has_sep && from_base == 16 && (from_num.len() % 2) == 0 {
                 // No separators, manually split by groups of 2
-                let mut num_vec = Vec::new();
-                let mut holder = String::new();
-                for num in from_num.chars() {
-                    holder.push(num);
-                    if holder.len() == 2 {
-                        num_vec.push(convert_to_base_10(holder.to_string(), from_base, opt.sep_char)?);
-                        holder.clear();
-                    }
-                }
-                num_vec
+                parse_hex_string(&from_num, from_base)?
             }
             else {
                 // Gather each separated number into a vector for separate conversion
                 from_num.split(&sep_list[..])
                     .map(|s| s.to_string())
                     .collect::<Vec<String>>().iter()
-                    .map(|num| convert_to_base_10(num.to_string(), from_base, opt.sep_char).unwrap())
+                    .map(|num| convert_to_base_10(num, from_base, opt.sep_char).unwrap())
                         .collect::<Vec<u128>>()
             }
         }
+        else if opt.fourcc {
+            // Convert input number to base 16
+            let this_num_str = as_string_base(&convert_to_base_10(&from_num, from_base, opt.sep_char)?, 16).expect("can parse fourcc input number");
+            // Split that by hex num
+            parse_hex_string(&this_num_str, 16)?
+        }
         else {
-            vec![convert_to_base_10(from_num, from_base, opt.sep_char)?]
+            vec![convert_to_base_10(&from_num, from_base, opt.sep_char)?]
         };
 
     parse_map(&opt.sep_map, &mut sep_table)?;
@@ -136,7 +135,12 @@ fn main() -> Result<(), ErrorCode> {
                 // Convert to ascii
                 let out_str: String =
                     num_vec.iter().map(|c| *c as u8 as char).collect();
-                (String::from("ASCII"), out_str)
+                if opt.fourcc {
+                    (String::from("FOURCC"), out_str.chars().rev().collect())
+                }
+                else {
+                    (String::from("ASCII"), out_str)
+                }
             }
             else {
                 let custom_base = match u32::from_str_radix(&target_base, 10) {
@@ -249,6 +253,19 @@ fn map_parse_err_print() -> Result<(), ErrorCode> {
     println!("Ensure separate entries are separated with ','");
     println!("Ensure base/space numbers are separated with ':'");
     return Err(ErrorCode::SeparatorMapParseError);
+}
+
+fn parse_hex_string(from_num: &str, from_base: u32) -> Result<Vec<u128>, ErrorCode> {
+    let mut num_vec = Vec::new();
+    let mut holder = String::new();
+    for num in from_num.chars() {
+        holder.push(num);
+        if holder.len() == 2 {
+            num_vec.push(convert_to_base_10(&holder, from_base, ' ')?);
+            holder.clear();
+        }
+    }
+    Ok(num_vec)
 }
 
 
@@ -401,7 +418,7 @@ fn get_base_and_num(opt: &Opt, to_bases: &mut Vec<String>) -> Result<(u32, Strin
 // RETURN: Base in base 10, or an error.
 //
 fn convert_to_base_10(
-    from_num: String,
+    from_num: &str,
     from_base: u32,
     sep_char: char,
 ) -> Result<u128, ErrorCode> {
@@ -522,6 +539,10 @@ struct Opt {
     #[structopt(short, long, parse(from_occurrences))]
     verbosity: u8,
 
+    /// To FourCC - converts the input to a fourcc output
+    #[structopt(long)]
+    fourcc: bool,
+
     /// Char representation of input base (b, o, d, or h) [optional]
     from_base_char: Option<String>,
 
@@ -564,7 +585,7 @@ mod tests {
     #[test]
     fn test_get_bases() {
         let mut opt = Opt {
-            pad: 0,
+            pad_map: "".to_owned(),
             sep_length: 4,
             sep_map: "".to_owned(),
             sep_char: '.',
@@ -575,6 +596,8 @@ mod tests {
             from_clipboard: false,
             bare: false,
             verbosity: 0,
+            is_string: false,
+            fourcc: false,
             from_base_char: Some("b".to_owned()),
             from_num: Some("187".to_owned()),
             to_bases: Vec::new(),
@@ -596,14 +619,14 @@ mod tests {
     #[test]
     fn test_convert_to_base_10() {
         assert_eq!(
-            convert_to_base_10(Some("10111011".to_owned()), 2, '_'),
+            convert_to_base_10("10111011", 2, '_'),
             Ok(187)
         );
-        assert_eq!(convert_to_base_10(Some("273".to_owned()), 8,  '_'), Ok(187));
-        assert_eq!(convert_to_base_10(Some("187".to_owned()), 10, '_'), Ok(187));
-        assert_eq!(convert_to_base_10(Some("BB" .to_owned()), 16, '_'), Ok(187));
+        assert_eq!(convert_to_base_10("273", 8,  '_'), Ok(187));
+        assert_eq!(convert_to_base_10("187", 10, '_'), Ok(187));
+        assert_eq!(convert_to_base_10("BB" , 16, '_'), Ok(187));
         assert_eq!(
-            convert_to_base_10(None, 10, '_'),
+            convert_to_base_10("", 10, '_'),
             Err(ErrorCode::InputBaseErr)
         );
     }
