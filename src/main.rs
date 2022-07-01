@@ -400,7 +400,7 @@ fn get_base_and_num(opt: &Opt, to_bases: &mut Vec<String>) -> Result<(u32, Strin
                 // base_char wasn't provided, use the `-b` flag value as the base.
                 // get from_num from clipboard
                 let from_num = get_clipboard_content()?;
-                Ok((opt.from_base, from_num.expect("a string")))
+                Ok((opt.from_base, from_num))
             }
         }
     }
